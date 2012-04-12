@@ -1,0 +1,17 @@
+/*
+
+Darko Bunic
+http://www.redips.net/
+Apr, 2012.
+
+*/
+body {
+	font-family: arial;
+}
+
+
+/* container with ol element in center */
+#container {
+	margin: auto;
+	width: 200px;
+}

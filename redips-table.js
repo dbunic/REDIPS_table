@@ -39,7 +39,8 @@ REDIPS.table = (function () {
 		column,					// method adds/deletes table column
 		cell_list,				// method returns cell list with new coordinates
 		relocate,				// relocate element nodes from source cell to the target cell
-		cell_index,			// method displays cellIndex (debug mode)
+		remove_selection,		// method removes text selection
+		cell_index,				// method displays cellIndex (debug mode)
 
 		// private properties
 		tables = [],			// table collection
@@ -47,9 +48,9 @@ REDIPS.table = (function () {
 		show_index,				// (boolean) show cell index
 
 		// variables in the private scope revealed as public properties
-		color = {cell: '#9BB3DA',	// color of marked cell
-				row: '#E7AB83',		// color of marked row
-				column: '#E7AB83'};	// color of marked column
+		color = {cell: false,	// color of marked cell
+				row: false,		// color of marked row
+				column: false};	// color of marked column
 
 
 	/**
@@ -204,6 +205,8 @@ REDIPS.table = (function () {
 			i, j,		// loop variables
 			first = {index : -1,	// index of first cell in sequence
 					span : -1};		// span value (colspan / rowspan) of first cell in sequence
+		// remove text selection
+		remove_selection();
 		// if table input parameter is undefined then use "tables" private property (table array) or set table reference from get_table method
 		tbl = (table === undefined) ? tables : get_table(table);
 		// open loop for each table inside container
@@ -393,6 +396,8 @@ REDIPS.table = (function () {
 			}
 			return rs;
 		};
+		// remove text selection
+		remove_selection();
 		// if table input parameter is undefined then use "tables" private property (table array) or set table reference from get_table method
 		tbl = (table === undefined) ? tables : get_table(table);
 		// loop TABLE
@@ -507,6 +512,8 @@ REDIPS.table = (function () {
 			cl,			// cell list
 			cols = 0,	// number of columns
 			i, j, k;	// loop variables
+		// remove text selection
+		remove_selection();
 		// if table is not object then input parameter is id and table parameter will be overwritten with table reference
 		if (typeof(table) !== 'object') {
 			table = document.getElementById(table);
@@ -586,6 +593,8 @@ REDIPS.table = (function () {
 			idx,	// cell index needed when column is deleted
 			nc,		// new cell
 			i;		// loop variable
+		// remove text selection
+		remove_selection();
 		// if table is not object then input parameter is id and table parameter will be overwritten with table reference
 		if (typeof(table) !== 'object') {
 			table = document.getElementById(table);
@@ -707,6 +716,27 @@ REDIPS.table = (function () {
 
 	};
 
+
+	/**
+	 * Method removes text selection.
+	 * @private
+	 * @memberOf REDIPS.table#
+	 */
+	remove_selection = function () {
+		// remove text selection (Chrome, FF, Opera, Safari)
+		if (window.getSelection) {
+			window.getSelection().removeAllRanges();
+		}
+		// IE8
+		else if (document.selection && document.selection.type === "Text") {
+			try {
+				document.selection.empty();
+			}
+			catch (error) {
+				// ignore error to as a workaround for bug in IE8
+			}
+		}
+	};
 
 	/**
 	 * http://www.javascripttoolbox.com/temp/table_cellindex.html
@@ -845,15 +875,13 @@ REDIPS.table = (function () {
 	return {
 		/* public properties */
 		/**
-		 * Color object contains 3 properties: cell, row and column. cell is color for marked cell, row is color for marked row and column is color for marked column.
+		 * color.cell defines background color for marked table cell. If not set then background color will not be changed.
 		 * @type Object
 		 * @name REDIPS.table#color
+		 * @default null
 		 * @example
 		 * // set "#9BB3DA" as color for marked cell
 		 * REDIPS.table.color.cell = '#9BB3DA';
-		 *  
-		 * // or set "Lime" as color for marked row
-		 * REDIPS.table.color.row = 'Lime';
 		 */
 		color : color,
 		/* public methods are documented in main code */

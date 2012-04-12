@@ -11,8 +11,8 @@ body {
 	margin: 0px;
 }
 
-/* drag container */
-#drag {
+/* container */
+#container {
 	margin: 20px auto;
 	border: 2px dashed LightBlue;
 	font-size: 10pt;
@@ -20,7 +20,7 @@ body {
 }
 
 /* both tables */
-div#drag table {
+div#container table {
 	/*border-collapse: collapse;*/
 	border-collapse: separate;
 	border-spacing: 1px;
@@ -40,7 +40,7 @@ div#drag table {
 }
 
 /* table cells */
-div#drag td {
+div#container td {
 	border: 1px solid navy;
 	height: 50px;
 	width: 80px;
