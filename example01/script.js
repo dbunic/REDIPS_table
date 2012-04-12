@@ -19,7 +19,7 @@ redips_init = function () {
 	// show cellIndex (it is nice for debugging)
 	rt.cell_index(true);
 	// define background color for marked cell
-	rt.color.cell = '#9BB3DA';
+	rt.color.cell = '#32568E';
 };
 
 // function merges table cells

@@ -34,6 +34,14 @@ div#row2 table {
 	margin: 7px;
 }
 
+/* define background color for blue & orange tables */
+.blue {
+	background-color: #C7D5ED;
+}
+.orange {
+	background-color: #FFEFD2;
+}
+
 /* toolbox table */
 #toolbox {
 	background-color: #ccc;
