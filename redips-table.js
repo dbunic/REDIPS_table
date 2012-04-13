@@ -2,8 +2,8 @@
 Copyright (c)  2008-2012, www.redips.net  All rights reserved.
 Code licensed under the BSD License: http://www.redips.net/license/
 http://www.redips.net/javascript/table-td-merge-split/
-Version 1.0.0
-Apr 11, 2012.
+Version 1.0.1
+Apr 14, 2012.
 */
 
 /*jslint white: true, browser: true, undef: true, nomen: true, eqeqeq: true, plusplus: false, bitwise: true, regexp: true, strict: true, newcap: true, immed: true, maxerr: 14 */
@@ -22,7 +22,7 @@ var REDIPS = REDIPS || {};
  * @author Darko Bunic
  * @see
  * <a href="http://www.redips.net/javascript/table-td-merge-split/">JavaScript autocomplete</a>
- * @version 1.0.0
+ * @version 1.0.1
  */
 REDIPS.table = (function () {
 		// methods declaration
@@ -401,13 +401,13 @@ REDIPS.table = (function () {
 		// if table input parameter is undefined then use "tables" private property (table array) or set table reference from get_table method
 		tbl = (table === undefined) ? tables : get_table(table);
 		// loop TABLE
-		for (t = 0; t < tables.length; t++) {
+		for (t = 0; t < tbl.length; t++) {
 			// define cell list with new coordinates
-			cl = cell_list(tables[t]);
+			cl = cell_list(tbl[t]);
 			// define maximum number of columns in table
-			max = max_cols(tables[t]);
+			max = max_cols(tbl[t]);
 			// define row number in current table
-			tr = tables[t].rows;
+			tr = tbl[t].rows;
 			// loop TR
 			for (i = 0; i < tr.length; i++) {
 				// define column number (depending on mode)
@@ -435,7 +435,7 @@ REDIPS.table = (function () {
 							// add "redips" property to the table cell and optionally event listener
 							cell_init(n);
 							// recreate cell list after vertical split (new cell is inserted)
-							cl = cell_list(tables[t]);
+							cl = cell_list(tbl[t]);
 						}
 					}
 					// split horizontally

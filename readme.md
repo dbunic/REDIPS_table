@@ -1,4 +1,4 @@
-REDIPS.table 1.0.0
+REDIPS.table 1.0.1
 ============
 
 ## What's REDIPS.table?

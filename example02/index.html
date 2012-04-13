@@ -1,0 +1,59 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+	<head>
+		<meta name="author" content="Darko Bunic"/>
+		<meta name="description" content="Merge and split table cells with JavaScript"/>
+		<meta name="viewport" content="width=device-width, user-scalable=no"/><!-- "position: fixed" fix for Android 2.2+ -->
+		<link rel="stylesheet" href="style.css" type="text/css" media="screen" />
+		<script type="text/javascript" src="../header.js"></script>
+		<script type="text/javascript" src="../redips-table.js"></script>
+		<script type="text/javascript" src="script.js"></script>
+		<title>Example 2: Merge / split table cells</title>
+	</head>
+	<body>
+		<!-- container -->
+		<div id="container">
+			<input type="button" value="Merge" class="button" onclick="merge1()" title="Merge cells in second row"/>
+			<!-- table1 table -->
+			<table id="table1">
+				<tbody>
+					<tr>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+				</tbody>
+			</table>
+			<br/>
+			<br/>
+			<input type="button" value="Split" class="button" onclick="split1()" title="Split cell with defined id"/>
+			<!-- table1 table -->
+			<table id="table2">
+				<tbody>
+					<tr>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td id="c1" rowspan="2"></td>
+					</tr>
+					<tr>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</body>
+</html>

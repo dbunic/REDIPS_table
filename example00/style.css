@@ -48,19 +48,6 @@ div#container td {
 	padding: 2px;
 }
 
-/* drag object (DIV inside table cell) */
-.drag {
-	margin: auto;
-	text-align: center;
-	width: 67px;
-	height: 35px;
-	line-height: 35px;
-	border: 2px solid SteelBlue;
-	background-color: white;
-	/* round corners */
-	border-radius: 4px;
-}
-
 /* button styles */
 .button {
 	margin: 5px 10px;
@@ -69,10 +56,4 @@ div#container td {
 	border-width: 1px;
 	width: 60px;
 	padding: 0px;
-}
-
-/* trash cell */
-.trash {
-	color: white;
-	background-color: #6386BD;
 }
