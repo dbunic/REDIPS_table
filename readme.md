@@ -3,7 +3,8 @@ REDIPS.table 1.0.1
 
 ## What's REDIPS.table?
 
-REDIPS.table is a JavaScript library which enables dynamically merging and splitting table cells. It is possible to activate onmousedown event listeners on TD element to interactively mark cell with mouse button.
+REDIPS.table is a JavaScript library which enables dynamically merging and splitting table cells.
+It is possible to activate onmousedown event listeners on TD element to interactively mark cells with mouse button.
 
 ## Features
 
