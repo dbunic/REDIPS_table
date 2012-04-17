@@ -6,19 +6,22 @@
 
 
 // merge cells in first table in second row
-function merge1 () {
+function merge1() {
 	// mark cells for merging (cells should be marked in a sequence)
 	// background will not be set
 	REDIPS.table.mark(true, 'table1', 1, 1);
 	REDIPS.table.mark(true, 'table1', 1, 2);
 	REDIPS.table.mark(true, 'table1', 1, 3);
-	// merge cells
-	REDIPS.table.merge('h', 'table1');
+	// merge cells:
+	// 'h' - horizontally
+	// true - clear mark after merging
+	// 'table1' - table id
+	REDIPS.table.merge('h', true, 'table1');
 }
 
 
 // function splits cell with defined id
-function split1 () {
+function split1() {
 	// first mark cell with id="c1"
 	REDIPS.table.mark(true, 'c1');
 	// and then split marked cell in table2

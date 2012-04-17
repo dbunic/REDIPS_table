@@ -1,0 +1,4 @@
+Changes for REDIPS.table library
+
+1.0.2
+- added option to merge() method to leave or clear cells marked after merging (added boolean "clear" optional parameter)

@@ -4,16 +4,13 @@
 /* enable strict mode */
 "use strict";
 
-// define functions
-var redips_init,
-	rt,
-	merge,
-	split;
+// create redips container
+var redips = {};
 
 // initialization
-redips_init = function () {
+redips.init = function () {
 	// define reference to the REDIPS.table object
-	rt = REDIPS.table;
+	var rt = REDIPS.table;
 	// activate onmousedown event listener on cells for tables with class="blue"
 	rt.onmousedown('blue', true, 'classname');
 	// show cellIndex (it is nice for debugging)
@@ -23,19 +20,19 @@ redips_init = function () {
 };
 
 // function merges table cells
-merge = function (mode) {
-	rt.merge(mode);
+redips.merge = function (mode) {
+	REDIPS.table.merge(mode);
 };
 
 // function splits table cells if colspan/rowspan is greater then 1
-split = function (mode) {
-	rt.split(mode);
+redips.split = function (mode) {
+	REDIPS.table.split(mode);
 };
 
 // add onload event listener
 if (window.addEventListener) {
-	window.addEventListener('load', redips_init, false);
+	window.addEventListener('load', redips.init, false);
 }
 else if (window.attachEvent) {
-	window.attachEvent('onload', redips_init);
+	window.attachEvent('onload', redips.init);
 }

@@ -2,8 +2,8 @@
 Copyright (c)  2008-2012, www.redips.net  All rights reserved.
 Code licensed under the BSD License: http://www.redips.net/license/
 http://www.redips.net/javascript/table-td-merge-split/
-Version 1.0.1
-Apr 14, 2012.
+Version 1.0.2
+Apr 17, 2012.
 */
 
 /*jslint white: true, browser: true, undef: true, nomen: true, eqeqeq: true, plusplus: false, bitwise: true, regexp: true, strict: true, newcap: true, immed: true, maxerr: 14 */
@@ -22,7 +22,7 @@ var REDIPS = REDIPS || {};
  * @author Darko Bunic
  * @see
  * <a href="http://www.redips.net/javascript/table-td-merge-split/">JavaScript autocomplete</a>
- * @version 1.0.1
+ * @version 1.0.2
  */
 REDIPS.table = (function () {
 		// methods declaration
@@ -186,12 +186,13 @@ REDIPS.table = (function () {
 	/**
 	 * Method merges marked table cells horizontally or vertically.
 	 * @param {String} mode Merge type: h - horizontally, v - vertically. Default is "h".
+	 * @param {Boolean} [clear] true - cells will be clean (without mark) after merging, false -  cells will remain marked after merging. Default is "true". 
 	 * @param {HTMLElement|String} [table] Table id or table reference.
 	 * @public
 	 * @function
 	 * @name REDIPS.table#merge
 	 */
-	merge = function (mode, table) {
+	merge = function (mode, clear, table) {
 		var	tbl,		// table array (loaded from tables array or from table input parameter)
 			tr,			// row reference in table
 			c,			// current cell
@@ -249,13 +250,16 @@ REDIPS.table = (function () {
 					// sequence of marked cells is finished (naturally or next cell has different span value)
 					else if ((marked !== true && first.index > -1) || (first.span > -1 && first.span !== span)) {
 						// merge cells in a sequence (cell list, row/column, sequence start, sequence end, horizontal/vertical mode)
-						merge_cells(cl, i, first.index, j, mode);
+						merge_cells(cl, i, first.index, j, mode, clear);
 						// reset marked cell index and span value
 						first.index = first.span = -1;
 						// if cell is selected then unmark and reset marked flag
 						// reseting marked flag is needed in case for last cell in column/row (so merge_cells () outside for loop will not execute)
 						if (marked === true) {
-							mark(false, c);
+							// if clear flag is set to true (or undefined) then clear marked cell after merging
+							if (clear === true || clear === undefined) {
+								mark(false, c);
+							}
 							marked = false;
 						}
 					}
@@ -266,7 +270,7 @@ REDIPS.table = (function () {
 				}
 				// if loop is finished and last cell is marked (needed in case when TD sequence include last cell in table row)
 				if (marked === true) {
-					merge_cells(cl, i, first.index, j, mode);
+					merge_cells(cl, i, first.index, j, mode, clear);
 				}
 			}
 		}
@@ -282,10 +286,11 @@ REDIPS.table = (function () {
 	 * @param {Integer} pos1 Cell sequence start in row/column.
 	 * @param {Integer} pos2 Cell sequence end in row/column.
 	 * @param {String} mode Merge type: h - horizontally, v - vertically. Default is "h".
+	 * @param {Boolean} [clear] true - cells will be clean (without mark) after merging, false -  cells will remain marked after merging. Default is "true".
 	 * @private
 	 * @memberOf REDIPS.table#
 	 */
-	merge_cells = function (cl, idx, pos1, pos2, mode) {
+	merge_cells = function (cl, idx, pos1, pos2, mode, clear) {
 		var span = 0,	// set initial span value to 0
 			id,			// cell id in format "1-2", "1-4" ...
 			fc,			// reference of first cell in sequence
@@ -319,8 +324,10 @@ REDIPS.table = (function () {
 			else {
 				fc.colSpan += span;			// set new rowspan value
 			}
-			// set original background color and reset selected flag
-			mark(false, fc);
+			// if clear flag is set to true (or undefined) then set original background color and reset selected flag
+			if (clear === true || clear === undefined) {
+				mark(false, fc);
+			}
 		}
 	};
 
