@@ -1,4 +1,7 @@
 Changes for REDIPS.table library
 
+1.0.3
+- if onmousedown is not attached to table cells then appended row shouldn't listen onmousedown event also
+
 1.0.2
 - added option to merge() method to leave or clear cells marked after merging (added boolean "clear" optional parameter)

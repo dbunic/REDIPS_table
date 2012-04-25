@@ -2,8 +2,8 @@
 Copyright (c)  2008-2012, www.redips.net  All rights reserved.
 Code licensed under the BSD License: http://www.redips.net/license/
 http://www.redips.net/javascript/table-td-merge-split/
-Version 1.0.2
-Apr 17, 2012.
+Version 1.0.3
+Apr 25, 2012.
 */
 
 /*jslint white: true, browser: true, undef: true, nomen: true, eqeqeq: true, plusplus: false, bitwise: true, regexp: true, strict: true, newcap: true, immed: true, maxerr: 14 */
@@ -44,7 +44,7 @@ REDIPS.table = (function () {
 
 		// private properties
 		tables = [],			// table collection
-		td_event,				// if set to true then cell_init will attach event listener to the table cell
+		td_event,				// (boolean) if set to true then cell_init will attach event listener to the table cell
 		show_index,				// (boolean) show cell index
 
 		// variables in the private scope revealed as public properties
@@ -59,13 +59,13 @@ REDIPS.table = (function () {
 	 * All found tables will be saved in internal array.
 	 * Sending reference in this case will not be needed when calling merge or split method.
 	 * @param {String|HTMLElement} el Container Id. TD elements within container will have added onmousewdown event listener.
-	 * @param {Boolean} [event] If set to true then onmousedown event listener will be attached to every table cell.
+	 * @param {Boolean} [flag] If set to true then onmousedown event listener will be attached to every table cell.
 	 * @param {String} [type] If set to "class name" then all tables with a given class name (first parameter is considered as class name) will be initialized. Default is container/table reference or container/table id.
 	 * @public
 	 * @function
 	 * @name REDIPS.table#onmousedown
 	 */
-	onmousedown = function (el, event, type) {
+	onmousedown = function (el, flag, type) {
 		var	td,			// collection of table cells within container
 			i, t,		// loop variables
 			get_tables;	// private method returns array
@@ -84,7 +84,7 @@ REDIPS.table = (function () {
 			return arr;
 		};
 		// save event parameter to td_event private property
-		td_event = event;
+		td_event = flag;
 		// if third parameter is set to "classname" then select tables by given class name (first parameter is considered as class name) 
 		if (typeof(el) === 'string') {
 			if (type === 'classname') {
@@ -139,11 +139,12 @@ REDIPS.table = (function () {
 	 */
 	cell_init = function (c) {
 		// if td_event is set to true then onmousedown event listener will be attached to table cells
-		if (td_event === false) {
-			REDIPS.event.remove(c, 'mousedown', handler_onmousedown);
+		if (td_event === true) {
+			REDIPS.event.add(c, 'mousedown', handler_onmousedown);
 		}
 		else {
-			REDIPS.event.add(c, 'mousedown', handler_onmousedown);
+			REDIPS.event.remove(c, 'mousedown', handler_onmousedown);
+			
 		}
 	};
 
