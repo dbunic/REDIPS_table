@@ -26,11 +26,11 @@ It is possible to activate onmousedown event listeners on TD element to interact
 
 A reference documentation with a list of public properties and methods contained in REDIPS.table library.
 
-* [http://www.redips.net/javascript/redips-table-documentation/](REDIPS.table documentation)
+* [http://www.redips.net/javascript/redips-table-documentation/](http://www.redips.net/javascript/redips-table-documentation/)
 
 ## Demo
 
 Live demo shows REDIPS.table library in action: 
 
-* [http://www.redips.net/javascript/table-td-merge-split/](Merge and split table cells with JavaScript)
+* [http://www.redips.net/javascript/table-td-merge-split/](http://www.redips.net/javascript/table-td-merge-split/)
 
