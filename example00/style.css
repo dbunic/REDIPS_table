@@ -12,7 +12,7 @@ body {
 }
 
 /* container */
-#container {
+#myContainer {
 	margin: 20px auto;
 	border: 2px dashed LightBlue;
 	font-size: 10pt;
@@ -20,7 +20,7 @@ body {
 }
 
 /* both tables */
-div#container table {
+div#myContainer table {
 	/*border-collapse: collapse;*/
 	border-collapse: separate;
 	border-spacing: 1px;
@@ -40,10 +40,10 @@ div#container table {
 }
 
 /* table cells */
-div#container td {
+div#myContainer td {
 	border: 1px solid navy;
-	height: 50px;
-	width: 80px;
+	height: 40px;
+	width: 70px;
 	text-align: center;
 	padding: 2px;
 }
@@ -54,6 +54,7 @@ div#container td {
 	background-color: #6A93D4;
 	color: white; 
 	border-width: 1px;
-	width: 60px;
+	width: 50px;
 	padding: 0px;
+	font-size: 12px;
 }

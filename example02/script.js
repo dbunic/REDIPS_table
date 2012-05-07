@@ -8,7 +8,6 @@
 // merge cells in first table in second row
 function merge1() {
 	// mark cells for merging (cells should be marked in a sequence)
-	// background will not be set
 	REDIPS.table.mark(true, 'table1', 1, 1);
 	REDIPS.table.mark(true, 'table1', 1, 2);
 	REDIPS.table.mark(true, 'table1', 1, 3);
@@ -27,4 +26,3 @@ function split1() {
 	// and then split marked cell in table2
 	REDIPS.table.split('v', 'table2');
 }
-

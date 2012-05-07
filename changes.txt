@@ -1,5 +1,9 @@
 Changes for REDIPS.table library
 
+1.0.4
+- added control to disable deleting last row or last column in the table
+- added minimized version redips-table-min.js
+
 1.0.3
 - if onmousedown is not attached to table cells then appended row shouldn't listen onmousedown event also
 

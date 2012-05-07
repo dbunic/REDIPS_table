@@ -7,7 +7,8 @@
 // create redips container
 var redips = {};
 
-// initialization
+
+// REDIPS.table initialization
 redips.init = function () {
 	// define reference to the REDIPS.table object
 	var rt = REDIPS.table;
@@ -19,6 +20,7 @@ redips.init = function () {
 	rt.color.cell = '#9BB3DA';
 };
 
+
 // function merges table cells
 redips.merge = function () {
 	// first merge cells horizontally and leave cells marked
@@ -27,20 +29,25 @@ redips.merge = function () {
 	REDIPS.table.merge('v');
 };
 
+
 // function splits table cells if colspan/rowspan is greater then 1
+// mode is 'h' or 'v' (cells should be marked before)
 redips.split = function (mode) {
 	REDIPS.table.split(mode);
 };
+
 
 // insert/delete table row
 redips.row = function (type) {
 	REDIPS.table.row('mainTable', type);
 };
 
+
 // insert/delete table column
 redips.column = function (type) {
 	REDIPS.table.column('mainTable', type);
 };
+
 
 // add onload event listener
 if (window.addEventListener) {

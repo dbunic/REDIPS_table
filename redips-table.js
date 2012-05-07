@@ -2,8 +2,8 @@
 Copyright (c)  2008-2012, www.redips.net  All rights reserved.
 Code licensed under the BSD License: http://www.redips.net/license/
 http://www.redips.net/javascript/table-td-merge-split/
-Version 1.0.3
-Apr 25, 2012.
+Version 1.0.4
+May 7, 2012.
 */
 
 /*jslint white: true, browser: true, undef: true, nomen: true, eqeqeq: true, plusplus: false, bitwise: true, regexp: true, strict: true, newcap: true, immed: true, maxerr: 14 */
@@ -17,12 +17,12 @@ var REDIPS = REDIPS || {};
 
 /**
  * @namespace
- * @description REDIPS.table contains methods for merge / split table cells
+ * @description REDIPS.table is a JavaScript library which enables dynamically merging and splitting table cells.
  * @name REDIPS.table
  * @author Darko Bunic
  * @see
- * <a href="http://www.redips.net/javascript/table-td-merge-split/">JavaScript autocomplete</a>
- * @version 1.0.2
+ * <a href="http://www.redips.net/javascript/table-td-merge-split/">Merge and split table cells with JavaScript</a>
+ * @version 1.0.4
  */
 REDIPS.table = (function () {
 		// methods declaration
@@ -54,13 +54,19 @@ REDIPS.table = (function () {
 
 
 	/**
-	 * Method attaches or removes onmousedown event listener to TD element depending on second parameter value (default is true).
+	 * Method attaches or removes onmousedown event listener on TD elements depending on second parameter value (default is true).
 	 * If third parameter is set to "classname" then tables will be selected by class name (named in first parameter).
 	 * All found tables will be saved in internal array.
 	 * Sending reference in this case will not be needed when calling merge or split method.
 	 * @param {String|HTMLElement} el Container Id. TD elements within container will have added onmousewdown event listener.
 	 * @param {Boolean} [flag] If set to true then onmousedown event listener will be attached to every table cell.
 	 * @param {String} [type] If set to "class name" then all tables with a given class name (first parameter is considered as class name) will be initialized. Default is container/table reference or container/table id.
+	 * @example
+	 * // activate onmousedown event listener on cells within table with id="mainTable"
+	 * REDIPS.table.onmousedown('mainTable', true);
+	 *  
+	 * // activate onmousedown event listener on cells for tables with class="blue"
+	 * REDIPS.table.onmousedown('blue', true, 'classname');
 	 * @public
 	 * @function
 	 * @name REDIPS.table#onmousedown
@@ -505,12 +511,13 @@ REDIPS.table = (function () {
 
 
 	/**
-	 * Method adds / deletes table row. Last row will be assumed if index is omitted.
+	 * Method adds / deletes table row. If index is omitted then index of last row will be set.
 	 * @param {HTMLElement|String} table Table id or table reference.
 	 * @param {String} mode Insert/delete table row
 	 * @param {Integer} [index] Index where row will be inserted or deleted. Last row will be assumed if index is not defined.  
-	 * @private
-	 * @memberOf REDIPS.table#
+	 * @public
+	 * @function
+	 * @name REDIPS.table#row
 	 */
 	row = function (table, mode, index) {
 		var	nc,			// new cell
@@ -551,6 +558,10 @@ REDIPS.table = (function () {
 		}
 		// delete table row and update rowspan for cells in upper rows if needed
 		else {
+			// last row should not be deleted
+			if (table.rows.length === 1) {
+				return;
+			}
 			// delete last row
 			table.deleteRow(index);
 			// prepare cell list
@@ -593,8 +604,9 @@ REDIPS.table = (function () {
 	 * @param {HTMLElement|String} table Table id or table reference.
 	 * @param {String} mode Insert/delete table column
 	 * @param {Integer} [index] Index where column will be inserted or deleted. Last column will be assumed if index is not defined.  
-	 * @private
-	 * @memberOf REDIPS.table#
+	 * @public
+	 * @function
+	 * @name REDIPS.table#column
 	 */
 	column = function (table, mode, index) {
 		var	c,		// current cell
@@ -625,6 +637,12 @@ REDIPS.table = (function () {
 		}
 		// delete table column
 		else {
+			// set reference to the first row
+			c = table.rows[0].cells;
+			// test column number and prevent deleting last column
+			if (c.length === 1 && (c[0].colSpan === 1 || c[0].colSpan === undefined)) {
+				return;
+			}
 			// row loop
 			for (i = 0; i < table.rows.length; i++) {
 				// define cell index for last column
@@ -670,7 +688,7 @@ REDIPS.table = (function () {
 	 * REDIPS.table.mark(true, mytable, 1, 2);
 	 *  
 	 * // remove mark from the cell with coordinates (4,5) on table with id "t3"
-	 * REDIPS.table.mark(true, "t3", 4, 5);
+	 * REDIPS.table.mark(false, "t3", 4, 5);
 	 * @public
 	 * @function
 	 * @name REDIPS.table#mark
@@ -746,9 +764,13 @@ REDIPS.table = (function () {
 		}
 	};
 
+
 	/**
-	 * http://www.javascripttoolbox.com/temp/table_cellindex.html
-	 * http://www.barryvan.com.au/2012/03/determining-a-table-cells-x-and-y-positionindex/
+	 * Determining a table cell's X and Y position/index.
+	 * @see <a href="http://www.javascripttoolbox.com/temp/table_cellindex.html">http://www.javascripttoolbox.com/temp/table_cellindex.html</a>
+	 * @see <a href="http://www.barryvan.com.au/2012/03/determining-a-table-cells-x-and-y-positionindex/">http://www.barryvan.com.au/2012/03/determining-a-table-cells-x-and-y-positionindex/</a>
+	 * @private
+	 * @memberOf REDIPS.table#
 	 */
 	cell_list = function (table) {
 		var matrix = [],
@@ -803,9 +825,8 @@ REDIPS.table = (function () {
 	 * It is used in case of merging table cells.
 	 * @param {HTMLElement} from Source table cell.
 	 * @param {HTMLElement} to Target table cell.
-	 * @public
-	 * @function
-	 * @name REDIPS.table#relocate
+	 * @private
+	 * @memberOf REDIPS.table#
 	 */
 	relocate = function (from, to) {
 		var cn,		// number of child nodes
@@ -836,7 +857,7 @@ REDIPS.table = (function () {
 	 * @param {Boolean} flag If set to true then cell content will be replaced with cell index.
 	 * @public
 	 * @function
-	 * @name REDIPS.table#mark
+	 * @name REDIPS.table#cell_index
 	 */
 	cell_index = function (flag) {
 		// if input parameter isn't set and show_index private property is'nt true, then return

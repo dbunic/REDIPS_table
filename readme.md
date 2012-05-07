@@ -1,4 +1,4 @@
-REDIPS.table 1.0.3
+REDIPS.table 1.0.4
 ============
 
 ## What's REDIPS.table?
@@ -24,13 +24,13 @@ It is possible to activate onmousedown event listeners on TD element to interact
 
 ## Documentation
 
-A reference documentation with a list of public properties and methods contained in REDIPS.drag library.
+A reference documentation with a list of public properties and methods contained in REDIPS.table library.
 
-* [http://www.redips.net/javascript/in_progress/](in progress)
+* [http://www.redips.net/javascript/redips-table-documentation/](REDIPS.table documentation)
 
 ## Demo
 
 Live demo shows REDIPS.table library in action: 
 
-* [http://www.redips.net/javascript/in_progress/](in_progress)
+* [http://www.redips.net/javascript/table-td-merge-split/](Merge and split table cells with JavaScript)
 

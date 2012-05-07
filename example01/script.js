@@ -7,6 +7,7 @@
 // create redips container
 var redips = {};
 
+
 // initialization
 redips.init = function () {
 	// define reference to the REDIPS.table object
@@ -19,15 +20,18 @@ redips.init = function () {
 	rt.color.cell = '#32568E';
 };
 
+
 // function merges table cells
 redips.merge = function (mode) {
 	REDIPS.table.merge(mode);
 };
 
+
 // function splits table cells if colspan/rowspan is greater then 1
 redips.split = function (mode) {
 	REDIPS.table.split(mode);
 };
+
 
 // add onload event listener
 if (window.addEventListener) {
