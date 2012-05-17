@@ -1,5 +1,12 @@
 Changes for REDIPS.table library
 
+1.1.0
+- if table cell contains "ignore" class name then onmousedown event listener will not be attached to this table cell
+- in case of inserting table row, REDIPS.table.row() method will return row reference (otherwise it will return NULL)
+- added cell_ignore() method
+- fixed cell_index() method (tr reference is table.rows instead of table.getElementsByTagName('TR') - simpler solution and immune to inner tables)
+- added REDIPS.table.mark_nonempty public property (if set to false then not empty cells could not be marked)
+
 1.0.4
 - added control to disable deleting last row or last column in the table
 - added minimized version redips-table-min.js

@@ -1,4 +1,4 @@
-REDIPS.table 1.0.4
+REDIPS.table 1.1.0
 ============
 
 ## What's REDIPS.table?
@@ -11,6 +11,7 @@ It is possible to activate onmousedown event listeners on TD element to interact
 * merge / split table cells
 * add / remove table row
 * add / remove table column
+* enable / disable marking not empty table cells
 
 ## Public methods
 
@@ -21,6 +22,7 @@ It is possible to activate onmousedown event listeners on TD element to interact
 * REDIPS.table.row() - add / remove table row
 * REDIPS.table.column() - add / remove table column
 * REDIPS.table.cell_index() - display cell index (useful for demo / debugging)
+* REDIPS.table.cell_ignore() - remove onmousedown even listener from table cell in case of active REDIPS.table.onmousedown mode 
 
 ## Documentation
 

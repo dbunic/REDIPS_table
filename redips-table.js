@@ -2,8 +2,8 @@
 Copyright (c)  2008-2012, www.redips.net  All rights reserved.
 Code licensed under the BSD License: http://www.redips.net/license/
 http://www.redips.net/javascript/table-td-merge-split/
-Version 1.0.4
-May 7, 2012.
+Version 1.1.0
+May 15, 2012.
 */
 
 /*jslint white: true, browser: true, undef: true, nomen: true, eqeqeq: true, plusplus: false, bitwise: true, regexp: true, strict: true, newcap: true, immed: true, maxerr: 14 */
@@ -22,7 +22,7 @@ var REDIPS = REDIPS || {};
  * @author Darko Bunic
  * @see
  * <a href="http://www.redips.net/javascript/table-td-merge-split/">Merge and split table cells with JavaScript</a>
- * @version 1.0.4
+ * @version 1.1.0
  */
 REDIPS.table = (function () {
 		// methods declaration
@@ -41,6 +41,7 @@ REDIPS.table = (function () {
 		relocate,				// relocate element nodes from source cell to the target cell
 		remove_selection,		// method removes text selection
 		cell_index,				// method displays cellIndex (debug mode)
+		cell_ignore,			// method removes onmousedown even listener in case of active REDIPS.table.onmousedown mode
 
 		// private properties
 		tables = [],			// table collection
@@ -50,7 +51,8 @@ REDIPS.table = (function () {
 		// variables in the private scope revealed as public properties
 		color = {cell: false,	// color of marked cell
 				row: false,		// color of marked row
-				column: false};	// color of marked column
+				column: false},	// color of marked column
+		mark_nonempty = true;	// enable / disable marking not empty table cells.
 
 
 	/**
@@ -58,6 +60,7 @@ REDIPS.table = (function () {
 	 * If third parameter is set to "classname" then tables will be selected by class name (named in first parameter).
 	 * All found tables will be saved in internal array.
 	 * Sending reference in this case will not be needed when calling merge or split method.
+	 * Table cells marked with class name "ignore" will not have attached onmousedown event listener (in short, these table cells will be ignored).
 	 * @param {String|HTMLElement} el Container Id. TD elements within container will have added onmousewdown event listener.
 	 * @param {Boolean} [flag] If set to true then onmousedown event listener will be attached to every table cell.
 	 * @param {String} [type] If set to "class name" then all tables with a given class name (first parameter is considered as class name) will be initialized. Default is container/table reference or container/table id.
@@ -138,12 +141,16 @@ REDIPS.table = (function () {
 
 
 	/**
-	 * Method attaches "mousedown" event listener and creates "redips" property to the newly created table cell.
+	 * Method attaches "mousedown" event listener to the newly created table cell or removes event listener if needed.
 	 * @param {HTMLElement} c Table cell element.
 	 * @private
 	 * @memberOf REDIPS.table#
 	 */
 	cell_init = function (c) {
+		// if cell contains "ignore" class name then ignore this table cell
+		if (c.className.indexOf('ignore') > -1) {
+			return;
+		}
 		// if td_event is set to true then onmousedown event listener will be attached to table cells
 		if (td_event === true) {
 			REDIPS.event.add(c, 'mousedown', handler_onmousedown);
@@ -152,6 +159,24 @@ REDIPS.table = (function () {
 			REDIPS.event.remove(c, 'mousedown', handler_onmousedown);
 			
 		}
+	};
+
+
+	/**
+	 * Method removes attached onmousedown event listener.
+	 * Sometimes is needed to manually ignore some cells in table after row/column were dynamically added.
+	 * @param {HTMLElement|String} c Cell id or cell reference of table that should be ignored (onmousedown event listener will be removed).
+	 * @public
+	 * @function
+	 * @name REDIPS.table#cell_ignore
+	 */
+	cell_ignore = function (c) {
+		// if input parameter is string then overwrite it with cell reference
+		if (typeof(c) === 'string') {
+			c = document.getElementById(c);
+		}
+		// remove onmousedown event listener
+		REDIPS.event.remove(c, 'mousedown', handler_onmousedown);
 	};
 
 
@@ -165,7 +190,15 @@ REDIPS.table = (function () {
 	handler_onmousedown = function (e) {
 		var evt = e || window.event,
 			td = evt.target || evt.srcElement,  
-			mouseButton;
+			mouseButton,
+			empty;
+		// set empty flag for clicked TD element
+		// http://forums.asp.net/t/1409248.aspx/1
+		empty = (/^\s*$/.test(td.innerHTML)) ? true : false;
+		// if "mark_nonempty" is set to false and current cell is not empty then do nothing (just return from the event handler)
+		if (REDIPS.table.mark_nonempty === false && empty === false) {
+			return;
+		}
 		// define which mouse button was pressed
 		if (evt.which) {
 			mouseButton = evt.which;
@@ -514,14 +547,15 @@ REDIPS.table = (function () {
 	 * Method adds / deletes table row. If index is omitted then index of last row will be set.
 	 * @param {HTMLElement|String} table Table id or table reference.
 	 * @param {String} mode Insert/delete table row
-	 * @param {Integer} [index] Index where row will be inserted or deleted. Last row will be assumed if index is not defined.  
+	 * @param {Integer} [index] Index where row will be inserted or deleted. Last row will be assumed if index is not defined.
+	 * @return {HTMLElement} Returns reference of inserted row or NULL (in case of deleting row).
 	 * @public
 	 * @function
 	 * @name REDIPS.table#row
 	 */
 	row = function (table, mode, index) {
 		var	nc,			// new cell
-			nr,			// new row
+			nr = null,	// new row
 			fr,			// reference of first row
 			c,			// current cell reference
 			cl,			// cell list
@@ -595,7 +629,8 @@ REDIPS.table = (function () {
 				i += c.colSpan - 1;
 			}
 		}
-
+		// in case of inserting new table row method will return TR reference (otherwise it will return NULL)
+		return nr;
 	};
 
 
@@ -783,8 +818,8 @@ REDIPS.table = (function () {
 			firstAvailCol,
 			tr,			// TR collection
 			i, j, k, l;	// loop variables
-		// collect TR elements within table
-		tr = table.getElementsByTagName('TR');
+		// set HTML collection of table rows
+		tr = table.rows;
 		// open loop for each TR element
 		for (i = 0; i < tr.length; i++) {
 			// open loop for each cell within current row
@@ -913,6 +948,16 @@ REDIPS.table = (function () {
 		 * REDIPS.table.color.cell = '#9BB3DA';
 		 */
 		color : color,
+		/**
+		 * Enable / disable marking not empty table cells.
+		 * @type Boolean
+		 * @name REDIPS.table#mark_nonempty
+		 * @default true
+		 * @example
+		 * // allow marking only empty cells
+		 * REDIPS.table.mark_nonempty = false;
+		 */
+		mark_nonempty : mark_nonempty,
 		/* public methods are documented in main code */
 		onmousedown : onmousedown,
 		mark : mark,
@@ -920,7 +965,8 @@ REDIPS.table = (function () {
 		split : split,
 		row : row,
 		column : column,
-		cell_index : cell_index
+		cell_index : cell_index,
+		cell_ignore : cell_ignore
 	};
 }());
 
