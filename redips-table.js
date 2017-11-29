@@ -76,6 +76,7 @@ REDIPS.table = (function () {
 	 */
 	onmousedown = function (el, flag, type) {
 		var	td,			// collection of table cells within container
+			th,         // collection of table header cells within container
 			i, t,		// loop variables
 			get_tables;	// private method returns array
 		// method returns array with table nodes for a DOM node
@@ -127,6 +128,14 @@ REDIPS.table = (function () {
 		}
 		// at this point tables should contain one or more tables
 		for (t = 0; t < tables.length; t++) {
+			// collect table header cells from the selected table
+			th = tables[t].getElementsByTagName('th');
+			// loop goes through every collected TH
+			for (i = 0; i < th.length; i++) {
+				// add or remove event listener
+				cell_init(th[i]);
+			}
+			
 			// collect table cells from the selected table
 			td = tables[t].getElementsByTagName('td');
 			// loop goes through every collected TD
@@ -751,8 +760,8 @@ REDIPS.table = (function () {
 			// set reference to the cell (overwrite input el parameter)
 			el = cl[row + '-' + col];
 		}
-		// if el doesn't exist (el is not set in previous step) or el is not table cell either then return from method
-		if (!el || el.nodeName !== 'TD') {
+		// if el doesn't exist (el is not set in previous step) or el is not table cell or table header cell either then return from method
+		if (!el || (el.nodeName !== 'TD' && el.nodeName !== 'TH')) {
 			return;
 		}
 		// if custom property "redips" doesn't exist then create custom property

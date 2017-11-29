@@ -40,7 +40,7 @@ div#myContainer table {
 }
 
 /* table cells */
-div#myContainer td {
+div#myContainer td, div#myContainer th {
 	border: 1px solid navy;
 	height: 40px;
 	width: 70px;
