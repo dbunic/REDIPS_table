@@ -5,7 +5,7 @@ http://www.redips.net/javascript/table-td-merge-split/
 Version 1.1.0
 May 15, 2012.
 */
-"use strict";var REDIPS=REDIPS||{};REDIPS.table=(function(){var onmousedown,handler_onmousedown,merge,merge_cells,max_cols,split,get_table,mark,cell_init,row,column,cell_list,relocate,remove_selection,cell_index,cell_ignore,tables=[],td_event,show_index,color={cell:!1,row:!1,column:!1},mark_nonempty=!0;onmousedown=function(el,flag,type){var td,th,i,t,get_tables;get_tables=function(el){var arr=[],nodes,i;nodes=el.getElementsByTagName('table');for(i=0;i<nodes.length;i++){arr.push(nodes[i])}
+"use strict";var REDIPS=REDIPS||{};REDIPS.table=(function(){var onmousedown,handler_onmousedown,merge,merge_cells,max_cols,split,get_table,mark,cell_init,row,column,cell_list,relocate,remove_selection,cell_index,cell_ignore,getParentCell,tables=[],td_event,show_index,color={cell:!1,row:!1,column:!1},mark_nonempty=!0;onmousedown=function(el,flag,type){var td,th,i,t,get_tables;get_tables=function(el){var arr=[],nodes,i;nodes=el.getElementsByTagName('table');for(i=0;i<nodes.length;i++){arr.push(nodes[i])}
 return arr};td_event=flag;if(typeof(el)==='string'){if(type==='classname'){tables=get_tables(document);for(i=0;i<tables.length;i++){if(tables[i].className.indexOf(el)===-1){tables.splice(i,1);i--}}}
 else{el=document.getElementById(el)}}
 if(el&&typeof(el)==='object'){if(el.nodeName==='TABLE'){tables[0]=el}
@@ -15,11 +15,15 @@ td=tables[t].getElementsByTagName('td');for(i=0;i<td.length;i++){cell_init(td[i]
 cell_index()};cell_init=function(c){if(c.className.indexOf('ignore')>-1){return}
 if(td_event===!0){REDIPS.event.add(c,'mousedown',handler_onmousedown)}
 else{REDIPS.event.remove(c,'mousedown',handler_onmousedown)}};cell_ignore=function(c){if(typeof(c)==='string'){c=document.getElementById(c)}
-REDIPS.event.remove(c,'mousedown',handler_onmousedown)};handler_onmousedown=function(e){var evt=e||window.event,td=evt.target||evt.srcElement,mouseButton,empty;empty=(/^\s*$/.test(td.innerHTML))?!0:!1;if(REDIPS.table.mark_nonempty===!1&&empty===!1){return}
+REDIPS.event.remove(c,'mousedown',handler_onmousedown)};handler_onmousedown=function(e){var evt=e||window.event,td=getParentCell(evt.target||evt.srcElement),mouseButton,empty;if(!td){return}
+empty=(/^\s*$/.test(td.innerHTML))?!0:!1;if(REDIPS.table.mark_nonempty===!1&&empty===!1){return}
 if(evt.which){mouseButton=evt.which}
 else{mouseButton=evt.button}
 if(mouseButton===1){td.redips=td.redips||{};if(td.redips.selected===!0){mark(!1,td)}
-else{mark(!0,td)}}};merge=function(mode,clear,table){var tbl,tr,c,rc1,rc2,marked,span,id,cl,t,i,j,first={index:-1,span:-1};remove_selection();tbl=(table===undefined)?tables:get_table(table);for(t=0;t<tbl.length;t++){cl=cell_list(tbl[t]);tr=tbl[t].rows;rc1=(mode==='v')?max_cols(tbl[t]):tr.length;rc2=(mode==='v')?tr.length:max_cols(tbl[t]);for(i=0;i<rc1;i++){first.index=first.span=-1;for(j=0;j<=rc2;j++){id=(mode==='v')?(j+'-'+i):(i+'-'+j);if(cl[id]){c=cl[id];c.redips=c.redips||{};marked=c?c.redips.selected:!1;span=(mode==='v')?c.colSpan:c.rowSpan}
+else{mark(!0,td)}}};getParentCell=function(node){if(!node){return null}
+if(node.nodeName=='TD'||node.nodeName=='TH'){return node}
+return getParentCell(node.parentNode)}
+merge=function(mode,clear,table){var tbl,tr,c,rc1,rc2,marked,span,id,cl,t,i,j,first={index:-1,span:-1};remove_selection();tbl=(table===undefined)?tables:get_table(table);for(t=0;t<tbl.length;t++){cl=cell_list(tbl[t]);tr=tbl[t].rows;rc1=(mode==='v')?max_cols(tbl[t]):tr.length;rc2=(mode==='v')?tr.length:max_cols(tbl[t]);for(i=0;i<rc1;i++){first.index=first.span=-1;for(j=0;j<=rc2;j++){id=(mode==='v')?(j+'-'+i):(i+'-'+j);if(cl[id]){c=cl[id];c.redips=c.redips||{};marked=c?c.redips.selected:!1;span=(mode==='v')?c.colSpan:c.rowSpan}
 else{marked=!1}
 if(marked===!0&&first.index===-1){first.index=j;first.span=span}
 else if((marked!==!0&&first.index>-1)||(first.span>-1&&first.span!==span)){merge_cells(cl,i,first.index,j,mode,clear);first.index=first.span=-1;if(marked===!0){if(clear===!0||clear===undefined){mark(!1,c)}

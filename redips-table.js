@@ -42,6 +42,7 @@ REDIPS.table = (function () {
 		remove_selection,		// method removes text selection
 		cell_index,				// method displays cellIndex (debug mode)
 		cell_ignore,			// method removes onmousedown even listener in case of active REDIPS.table.onmousedown mode
+		getParentCell,			// method returns first parent in tree what is TD or TH
 
 		// private properties
 		tables = [],			// table collection
@@ -198,9 +199,13 @@ REDIPS.table = (function () {
 	 */
 	handler_onmousedown = function (e) {
 		var evt = e || window.event,
-			td = evt.target || evt.srcElement,  
+			td = getParentCell(evt.target || evt.srcElement),  
 			mouseButton,
 			empty;
+				
+		if (!td) {
+			return;
+		}
 		// set empty flag for clicked TD element
 		// http://forums.asp.net/t/1409248.aspx/1
 		empty = (/^\s*$/.test(td.innerHTML)) ? true : false;
@@ -230,6 +235,24 @@ REDIPS.table = (function () {
 			}
 		}
 	};
+	
+	/**
+	 * Method returns first parent in tree what is TD or TH
+	 * Needed when there is rich content inside cell and selection onmousedown event is triggered on cell content
+	 * @param {HTMLElement} node Node
+	 * @private
+	 * @function
+	 * @memberOf REDIPS.table#
+	 */
+	getParentCell = function (node) {
+		if (!node) {
+			return null;
+		}
+	    if (node.nodeName == 'TD' || node.nodeName == 'TH') {
+	    	return node;
+	    }
+	    return getParentCell(node.parentNode);
+	}
 
 
 	/**
