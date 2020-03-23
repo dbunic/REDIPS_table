@@ -1,12 +1,21 @@
-/*jslint white: true, browser: true, undef: true, nomen: true, eqeqeq: true, plusplus: false, bitwise: true, regexp: true, strict: true, newcap: true, immed: true, maxerr: 14 */
-/*global window: false, REDIPS: true */
+/* eslint-env browser */
+/* eslint
+   semi: ["error", "always"],
+   indent: [2, "tab"],
+   no-tabs: 0,
+   no-multiple-empty-lines: ["error", {"max": 2, "maxEOF": 1}],
+   one-var: ["error", "always"] */
+/* global REDIPS */
 
 /* enable strict mode */
-"use strict";
+'use strict';
+
+// create redips container
+let redips = {};
 
 
 // merge cells in first table in second row
-function merge1() {
+redips.merge1 = function () {
 	// mark cells for merging (cells should be marked in a sequence)
 	REDIPS.table.mark(true, 'table1', 1, 1);
 	REDIPS.table.mark(true, 'table1', 1, 2);
@@ -16,13 +25,13 @@ function merge1() {
 	// true - clear mark after merging
 	// 'table1' - table id
 	REDIPS.table.merge('h', true, 'table1');
-}
+};
 
 
 // function splits cell with defined id
-function split1() {
+redips.split1 = function () {
 	// first mark cell with id="c1"
 	REDIPS.table.mark(true, 'c1');
 	// and then split marked cell in table2
 	REDIPS.table.split('v', 'table2');
-}
+};

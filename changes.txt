@@ -1,5 +1,8 @@
 Changes for REDIPS.table library
 
+1.2.0 (2020-03-23)
+- REDIPS.table is checked with ESLint - cleaning
+
 1.1.0
 - if table cell contains "ignore" class name then onmousedown event listener will not be attached to this table cell
 - in case of inserting table row, REDIPS.table.row() method will return row reference (otherwise it will return NULL)

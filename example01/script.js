@@ -1,11 +1,17 @@
-/*jslint white: true, browser: true, undef: true, nomen: true, eqeqeq: true, plusplus: false, bitwise: true, regexp: true, strict: true, newcap: true, immed: true, maxerr: 14 */
-/*global window: false, REDIPS: true */
+/* eslint-env browser */
+/* eslint
+   semi: ["error", "always"],
+   indent: [2, "tab"],
+   no-tabs: 0,
+   no-multiple-empty-lines: ["error", {"max": 2, "maxEOF": 1}],
+   one-var: ["error", "always"] */
+/* global REDIPS */
 
 /* enable strict mode */
-"use strict";
+'use strict';
 
 // create redips container
-var redips = {};
+let redips = {};
 
 
 // initialization
@@ -13,9 +19,9 @@ redips.init = function () {
 	// define reference to the REDIPS.table object
 	var rt = REDIPS.table;
 	// activate onmousedown event listener on cells for tables with class="blue"
-	rt.onmousedown('blue', true, 'classname');
+	rt.onMouseDown('blue', true, 'classname');
 	// show cellIndex (it is nice for debugging)
-	rt.cell_index(true);
+	rt.cellIndex(true);
 	// define background color for marked cell
 	rt.color.cell = '#32568E';
 };

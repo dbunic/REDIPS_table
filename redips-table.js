@@ -1,19 +1,27 @@
 /*
-Copyright (c)  2008-2012, www.redips.net  All rights reserved.
+Copyright (c)  2008-2020, www.redips.net  All rights reserved.
 Code licensed under the BSD License: http://www.redips.net/license/
 http://www.redips.net/javascript/table-td-merge-split/
-Version 1.1.0
-May 15, 2012.
+Version 1.2.0
+Mar 23, 2020.
 */
 
-/*jslint white: true, browser: true, undef: true, nomen: true, eqeqeq: true, plusplus: false, bitwise: true, regexp: true, strict: true, newcap: true, immed: true, maxerr: 14 */
-/*global window: false */
+/* eslint-env browser */
+/* eslint
+   semi: ["error", "always"],
+   indent: [2, "tab"],
+   no-tabs: 0,
+   no-multiple-empty-lines: ["error", {"max": 2, "maxEOF": 1}],
+   one-var: ["error", "always"] */
 
 /* enable strict mode */
-"use strict";
+'use strict';
 
-// create REDIPS namespace (if is not already defined in another REDIPS package)
-var REDIPS = REDIPS || {};
+/**
+ * @name REDIPS
+ * @description create REDIPS namespace (if is not already defined in another REDIPS package)
+ */
+var REDIPS = REDIPS || {}; // eslint-disable-line no-use-before-define
 
 /**
  * @namespace
@@ -22,67 +30,68 @@ var REDIPS = REDIPS || {};
  * @author Darko Bunic
  * @see
  * <a href="http://www.redips.net/javascript/table-td-merge-split/">Merge and split table cells with JavaScript</a>
- * @version 1.1.0
+ * @version 1.2.0
  */
 REDIPS.table = (function () {
-		// methods declaration
-	var	onmousedown,			// method attaches onmousedown event listener to table cells
-		handler_onmousedown,	// onmousedown handler
+	// methods declaration
+	var onMouseDown,			// method attaches onMouseDown event listener to table cells
+		handlerOnMouseDown,	// onMouseDown handler
 		merge,					// method merges marked cells
-		merge_cells,			// method merges/deletes table cells (used by merge_h & merge_v)
-		max_cols,				// method returns maximum number of columns in a table
+		mergeCells,			// method merges/deletes table cells (used by merge_h & merge_v)
+		maxCols,				// method returns maximum number of columns in a table
 		split,					// method splits merged cells (if cell has colspan/rowspan greater then 1)
-		get_table,				// method sets reference to the table (it's used in "merge" and "split" public methods) 
+		getTable,				// method sets reference to the table (it's used in "merge" and "split" public methods)
 		mark,					// method marks table cell
-		cell_init,				// method attaches "mousedown" event listener and creates "redips" property to the newly created table cell
+		cellInit,				// method attaches "mousedown" event listener and creates "redips" property to the newly created table cell
 		row,					// method adds/deletes table row
 		column,					// method adds/deletes table column
-		cell_list,				// method returns cell list with new coordinates
+		cellList,				// method returns cell list with new coordinates
 		relocate,				// relocate element nodes from source cell to the target cell
-		remove_selection,		// method removes text selection
-		cell_index,				// method displays cellIndex (debug mode)
-		cell_ignore,			// method removes onmousedown even listener in case of active REDIPS.table.onmousedown mode
+		removeSelection,		// method removes text selection
+		cellIndex,				// method displays cellIndex (debug mode)
+		cellIgnore,			// method removes onMouseDown even listener in case of active REDIPS.table.onMouseDown mode
 		getParentCell,			// method returns first parent in tree what is TD or TH
 
 		// private properties
 		tables = [],			// table collection
-		td_event,				// (boolean) if set to true then cell_init will attach event listener to the table cell
-		show_index,				// (boolean) show cell index
+		tdEvent,				// (boolean) if set to true then cellInit will attach event listener to the table cell
+		showIndex,				// (boolean) show cell index
 
 		// variables in the private scope revealed as public properties
-		color = {cell: false,	// color of marked cell
-				row: false,		// color of marked row
-				column: false},	// color of marked column
-		mark_nonempty = true;	// enable / disable marking not empty table cells.
+		color = {
+			cell: false,	// color of marked cell
+			row: false,		// color of marked row
+			column: false},	// color of marked column
+		markNonEmpty = true;	// enable / disable marking not empty table cells.
 
 
 	/**
-	 * Method attaches or removes onmousedown event listener on TD elements depending on second parameter value (default is true).
+	 * Method attaches or removes onMouseDown event listener on TD elements depending on second parameter value (default is true).
 	 * If third parameter is set to "classname" then tables will be selected by class name (named in first parameter).
 	 * All found tables will be saved in internal array.
 	 * Sending reference in this case will not be needed when calling merge or split method.
-	 * Table cells marked with class name "ignore" will not have attached onmousedown event listener (in short, these table cells will be ignored).
+	 * Table cells marked with class name "ignore" will not have attached onMouseDown event listener (in short, these table cells will be ignored).
 	 * @param {String|HTMLElement} el Container Id. TD elements within container will have added onmousewdown event listener.
-	 * @param {Boolean} [flag] If set to true then onmousedown event listener will be attached to every table cell.
+	 * @param {Boolean} [flag] If set to true then onMouseDown event listener will be attached to every table cell.
 	 * @param {String} [type] If set to "class name" then all tables with a given class name (first parameter is considered as class name) will be initialized. Default is container/table reference or container/table id.
 	 * @example
-	 * // activate onmousedown event listener on cells within table with id="mainTable"
-	 * REDIPS.table.onmousedown('mainTable', true);
-	 *  
-	 * // activate onmousedown event listener on cells for tables with class="blue"
-	 * REDIPS.table.onmousedown('blue', true, 'classname');
+	 * // activate onMouseDown event listener on cells within table with id="mainTable"
+	 * REDIPS.table.onMouseDown('mainTable', true);
+	 *
+	 * // activate onMouseDown event listener on cells for tables with class="blue"
+	 * REDIPS.table.onMouseDown('blue', true, 'classname');
 	 * @public
 	 * @function
-	 * @name REDIPS.table#onmousedown
+	 * @name REDIPS.table#onMouseDown
 	 */
-	onmousedown = function (el, flag, type) {
-		var	td,			// collection of table cells within container
-			th,         // collection of table header cells within container
+	onMouseDown = function (el, flag, type) {
+		let td,			// collection of table cells within container
+			th, // collection of table header cells within container
 			i, t,		// loop variables
-			get_tables;	// private method returns array
+			getTables;	// private method returns array
 		// method returns array with table nodes for a DOM node
-		get_tables = function (el) {
-			var arr = [],	// result array
+		getTables = function (el) {
+			let arr = [],	// result array
 				nodes,		// node collection
 				i;			// loop variable
 			// collect table nodes
@@ -94,13 +103,13 @@ REDIPS.table = (function () {
 			// return result array
 			return arr;
 		};
-		// save event parameter to td_event private property
-		td_event = flag;
-		// if third parameter is set to "classname" then select tables by given class name (first parameter is considered as class name) 
-		if (typeof(el) === 'string') {
+		// save event parameter to tdEvent private property
+		tdEvent = flag;
+		// if third parameter is set to "classname" then select tables by given class name (first parameter is considered as class name)
+		if (typeof (el) === 'string') {
 			if (type === 'classname') {
 				// collect all tables on the page
-				tables = get_tables(document);
+				tables = getTables(document);
 				// open loop
 				for (i = 0; i < tables.length; i++) {
 					// if class name is not found then cut out table from tables collection
@@ -117,14 +126,14 @@ REDIPS.table = (function () {
 			}
 		}
 		// el is object
-		if (el && typeof(el) === 'object') {
+		if (el && typeof (el) === 'object') {
 			// if container is already a table
 			if (el.nodeName === 'TABLE') {
-				tables[0] = el; 
+				tables[0] = el;
 			}
 			// else collect tables within container
 			else {
-				tables = get_tables(el);
+				tables = getTables(el);
 			}
 		}
 		// at this point tables should contain one or more tables
@@ -134,19 +143,19 @@ REDIPS.table = (function () {
 			// loop goes through every collected TH
 			for (i = 0; i < th.length; i++) {
 				// add or remove event listener
-				cell_init(th[i]);
+				cellInit(th[i]);
 			}
-			
+
 			// collect table cells from the selected table
 			td = tables[t].getElementsByTagName('td');
 			// loop goes through every collected TD
 			for (i = 0; i < td.length; i++) {
 				// add or remove event listener
-				cell_init(td[i]);
+				cellInit(td[i]);
 			}
 		}
-		// show cell index (if show_index public property is set to true)
-		cell_index();
+		// show cell index (if showIndex public property is set to true)
+		cellIndex();
 	};
 
 
@@ -156,37 +165,36 @@ REDIPS.table = (function () {
 	 * @private
 	 * @memberOf REDIPS.table#
 	 */
-	cell_init = function (c) {
+	cellInit = function (c) {
 		// if cell contains "ignore" class name then ignore this table cell
 		if (c.className.indexOf('ignore') > -1) {
 			return;
 		}
-		// if td_event is set to true then onmousedown event listener will be attached to table cells
-		if (td_event === true) {
-			REDIPS.event.add(c, 'mousedown', handler_onmousedown);
+		// if tdEvent is set to true then onMouseDown event listener will be attached to table cells
+		if (tdEvent === true) {
+			REDIPS.event.add(c, 'mousedown', handlerOnMouseDown);
 		}
 		else {
-			REDIPS.event.remove(c, 'mousedown', handler_onmousedown);
-			
+			REDIPS.event.remove(c, 'mousedown', handlerOnMouseDown);
 		}
 	};
 
 
 	/**
-	 * Method removes attached onmousedown event listener.
+	 * Method removes attached onMouseDown event listener.
 	 * Sometimes is needed to manually ignore some cells in table after row/column were dynamically added.
-	 * @param {HTMLElement|String} c Cell id or cell reference of table that should be ignored (onmousedown event listener will be removed).
+	 * @param {HTMLElement|String} c Cell id or cell reference of table that should be ignored (onMouseDown event listener will be removed).
 	 * @public
 	 * @function
-	 * @name REDIPS.table#cell_ignore
+	 * @name REDIPS.table#cellIgnore
 	 */
-	cell_ignore = function (c) {
+	cellIgnore = function (c) {
 		// if input parameter is string then overwrite it with cell reference
-		if (typeof(c) === 'string') {
+		if (typeof (c) === 'string') {
 			c = document.getElementById(c);
 		}
-		// remove onmousedown event listener
-		REDIPS.event.remove(c, 'mousedown', handler_onmousedown);
+		// remove onMouseDown event listener
+		REDIPS.event.remove(c, 'mousedown', handlerOnMouseDown);
 	};
 
 
@@ -197,20 +205,20 @@ REDIPS.table = (function () {
 	 * @private
 	 * @memberOf REDIPS.table#
 	 */
-	handler_onmousedown = function (e) {
-		var evt = e || window.event,
-			td = getParentCell(evt.target || evt.srcElement),  
+	handlerOnMouseDown = function (e) {
+		let evt = e || window.event,
+			td = getParentCell(evt.target || evt.srcElement),
 			mouseButton,
 			empty;
-				
+		// return if td is not defined
 		if (!td) {
 			return;
 		}
 		// set empty flag for clicked TD element
 		// http://forums.asp.net/t/1409248.aspx/1
-		empty = (/^\s*$/.test(td.innerHTML)) ? true : false;
-		// if "mark_nonempty" is set to false and current cell is not empty then do nothing (just return from the event handler)
-		if (REDIPS.table.mark_nonempty === false && empty === false) {
+		empty = !!(/^\s*$/.test(td.innerHTML));
+		// if "markNonEmpty" is set to false and current cell is not empty then do nothing (just return from the event handler)
+		if (REDIPS.table.markNonEmpty === false && empty === false) {
 			return;
 		}
 		// define which mouse button was pressed
@@ -221,7 +229,7 @@ REDIPS.table = (function () {
 			mouseButton = evt.button;
 		}
 		// if left mouse button is pressed and target cell is empty
-		if (mouseButton === 1 /*&& td.childNodes.length === 0*/) {
+		if (mouseButton === 1 /* && td.childNodes.length === 0 */) {
 			// if custom property "redips" doesn't exist then create custom property
 			td.redips = td.redips || {};
 			// cell is already marked
@@ -235,10 +243,10 @@ REDIPS.table = (function () {
 			}
 		}
 	};
-	
+
 	/**
 	 * Method returns first parent in tree what is TD or TH
-	 * Needed when there is rich content inside cell and selection onmousedown event is triggered on cell content
+	 * Needed when there is rich content inside cell and selection onMouseDown event is triggered on cell content
 	 * @param {HTMLElement} node Node
 	 * @private
 	 * @function
@@ -248,24 +256,24 @@ REDIPS.table = (function () {
 		if (!node) {
 			return null;
 		}
-	    if (node.nodeName == 'TD' || node.nodeName == 'TH') {
-	    	return node;
-	    }
-	    return getParentCell(node.parentNode);
-	}
+		if (node.nodeName === 'TD' || node.nodeName === 'TH') {
+			return node;
+		}
+		return getParentCell(node.parentNode);
+	};
 
 
 	/**
 	 * Method merges marked table cells horizontally or vertically.
 	 * @param {String} mode Merge type: h - horizontally, v - vertically. Default is "h".
-	 * @param {Boolean} [clear] true - cells will be clean (without mark) after merging, false -  cells will remain marked after merging. Default is "true". 
+	 * @param {Boolean} [clear] true - cells will be clean (without mark) after merging, false -  cells will remain marked after merging. Default is "true".
 	 * @param {HTMLElement|String} [table] Table id or table reference.
 	 * @public
 	 * @function
 	 * @name REDIPS.table#merge
 	 */
 	merge = function (mode, clear, table) {
-		var	tbl,		// table array (loaded from tables array or from table input parameter)
+		let tbl,		// table array (loaded from tables array or from table input parameter)
 			tr,			// row reference in table
 			c,			// current cell
 			rc1,		// row/column maximum value for first loop
@@ -274,26 +282,26 @@ REDIPS.table = (function () {
 			span,		// (integer) rowspan/colspan value
 			id,			// cell id in format "1-2", "1-4" ...
 			cl,			// cell list with new coordinates
-			t,			// table reference
-			i, j,		// loop variables
-			first = {index : -1,	// index of first cell in sequence
-					span : -1};		// span value (colspan / rowspan) of first cell in sequence
+			j,			// loop variable
+			first = {
+				index: -1,	// index of first cell in sequence
+				span: -1};		// span value (colspan / rowspan) of first cell in sequence
 		// remove text selection
-		remove_selection();
-		// if table input parameter is undefined then use "tables" private property (table array) or set table reference from get_table method
-		tbl = (table === undefined) ? tables : get_table(table);
+		removeSelection();
+		// if table input parameter is undefined then use "tables" private property (table array) or set table reference from getTable method
+		tbl = (table === undefined) ? tables : getTable(table);
 		// open loop for each table inside container
-		for (t = 0; t < tbl.length; t++) {
+		for (let t = 0; t < tbl.length; t++) {
 			// define cell list with new coordinates
-			cl = cell_list(tbl[t]);
+			cl = cellList(tbl[t]);
 			// define row number in current table
 			tr = tbl[t].rows;
 			// define maximum value for first loop (depending on mode)
-			rc1 = (mode === 'v') ? max_cols(tbl[t]) : tr.length;
+			rc1 = (mode === 'v') ? maxCols(tbl[t]) : tr.length;
 			// define maximum value for second loop (depending on mode)
-			rc2 = (mode === 'v') ? tr.length : max_cols(tbl[t]);
+			rc2 = (mode === 'v') ? tr.length : maxCols(tbl[t]);
 			// first loop
-			for (i = 0; i < rc1; i++) {
+			for (let i = 0; i < rc1; i++) {
 				// reset marked cell index and span value
 				first.index = first.span = -1;
 				// second loop
@@ -322,11 +330,11 @@ REDIPS.table = (function () {
 					// sequence of marked cells is finished (naturally or next cell has different span value)
 					else if ((marked !== true && first.index > -1) || (first.span > -1 && first.span !== span)) {
 						// merge cells in a sequence (cell list, row/column, sequence start, sequence end, horizontal/vertical mode)
-						merge_cells(cl, i, first.index, j, mode, clear);
+						mergeCells(cl, i, first.index, j, mode, clear);
 						// reset marked cell index and span value
 						first.index = first.span = -1;
 						// if cell is selected then unmark and reset marked flag
-						// reseting marked flag is needed in case for last cell in column/row (so merge_cells () outside for loop will not execute)
+						// reseting marked flag is needed in case for last cell in column/row (so mergeCells () outside for loop will not execute)
 						if (marked === true) {
 							// if clear flag is set to true (or undefined) then clear marked cell after merging
 							if (clear === true || clear === undefined) {
@@ -337,23 +345,23 @@ REDIPS.table = (function () {
 					}
 					// increase "j" counter for span value (needed for merging spanned cell and cell after when index is not in sequence)
 					if (cl[id]) {
-						j += (mode === 'v') ? c.rowSpan - 1: c.colSpan - 1;
+						j += (mode === 'v') ? c.rowSpan - 1 : c.colSpan - 1;
 					}
 				}
 				// if loop is finished and last cell is marked (needed in case when TD sequence include last cell in table row)
 				if (marked === true) {
-					merge_cells(cl, i, first.index, j, mode, clear);
+					mergeCells(cl, i, first.index, j, mode, clear);
 				}
 			}
 		}
-		// show cell index (if show_index public property is set to true)
-		cell_index();
+		// show cell index (if showIndex public property is set to true)
+		cellIndex();
 	};
 
 
 	/**
 	 * Method merges and deletes table cells in sequence (horizontally or vertically).
-	 * @param {Object} cl Cell list (output from cell_list method)
+	 * @param {Object} cl Cell list (output from cellList method)
 	 * @param {Integer} idx Row/column index in which cells will be merged.
 	 * @param {Integer} pos1 Cell sequence start in row/column.
 	 * @param {Integer} pos2 Cell sequence end in row/column.
@@ -362,16 +370,15 @@ REDIPS.table = (function () {
 	 * @private
 	 * @memberOf REDIPS.table#
 	 */
-	merge_cells = function (cl, idx, pos1, pos2, mode, clear) {
-		var span = 0,	// set initial span value to 0
+	mergeCells = function (cl, idx, pos1, pos2, mode, clear) {
+		let span = 0,	// set initial span value to 0
 			id,			// cell id in format "1-2", "1-4" ...
 			fc,			// reference of first cell in sequence
-			c,			// reference of current cell 
-			i;			// loop variable
+			c;			// reference of current cell
 		// set reference of first cell in sequence
 		fc = (mode === 'v') ? cl[pos1 + '-' + idx] : cl[idx + '-' + pos1];
 		// delete table cells and sum their colspans
-		for (i = pos1 + 1; i < pos2; i++) {
+		for (let i = pos1 + 1; i < pos2; i++) {
 			// set cell id (depending on horizontal/verical merging)
 			id = (mode === 'v') ? (i + '-' + idx) : (idx + '-' + i);
 			// if cell with given coordinates (in form like "1-2") exists, then process this cell
@@ -387,14 +394,14 @@ REDIPS.table = (function () {
 			}
 		}
 		// if cell exists
-		if (fc !== undefined) {		
+		if (fc !== undefined) {
 			// vertical merging
 			if (mode === 'v') {
-				fc.rowSpan += span;			// set new rowspan value
+				fc.rowSpan += span; // set new rowspan value
 			}
 			// horizontal merging
 			else {
-				fc.colSpan += span;			// set new rowspan value
+				fc.colSpan += span; // set new rowspan value
 			}
 			// if clear flag is set to true (or undefined) then set original background color and reset selected flag
 			if (clear === true || clear === undefined) {
@@ -410,21 +417,20 @@ REDIPS.table = (function () {
 	 * @private
 	 * @memberOf REDIPS.table#
 	 */
-	max_cols = function (table) {
-		var	tr = table.rows,	// define number of rows in current table
+	maxCols = function (table) {
+		let tr = table.rows,	// define number of rows in current table
 			span,				// sum of colSpan values
-			max = 0,			// maximum number of columns
-			i, j;				// loop variable
+			max = 0;			// maximum number of columns
 		// if input parameter is string then overwrite it with table reference
-		if (typeof(table) === 'string') {
+		if (typeof (table) === 'string') {
 			table = document.getElementById(table);
 		}
 		// open loop for each TR within table
-		for (i = 0; i < tr.length; i++) {
+		for (let i = 0; i < tr.length; i++) {
 			// reset span value
 			span = 0;
 			// sum colspan value for each table cell
-			for (j = 0; j < tr[i].cells.length; j++) {
+			for (let j = 0; j < tr[i].cells.length; j++) {
 				span += tr[i].cells[j].colSpan || 1;
 			}
 			// set maximum value
@@ -446,7 +452,7 @@ REDIPS.table = (function () {
 	 * @name REDIPS.table#split
 	 */
 	split = function (mode, table) {
-		var	tbl,	// table array (loaded from tables array or from table input parameter)
+		let tbl,	// table array (loaded from tables array or from table input parameter)
 			tr,		// row reference in table
 			c,		// current table cell
 			cl,		// cell list with new coordinates
@@ -454,12 +460,10 @@ REDIPS.table = (function () {
 			n,		// reference of inserted table cell
 			cols,	// number of columns (used in TD loop)
 			max,	// maximum number of columns
-			t,		// table reference
-			i, j,	// loop variables
-			get_rowspan;
+			getRowSpan;
 		// method returns number of rowspan cells before current cell (in a row)
-		get_rowspan = function (c, row, col) {
-			var rs,
+		getRowSpan = function (c, row, col) {
+			let rs,
 				last,
 				i;
 			// set rs
@@ -476,23 +480,23 @@ REDIPS.table = (function () {
 			return rs;
 		};
 		// remove text selection
-		remove_selection();
-		// if table input parameter is undefined then use "tables" private property (table array) or set table reference from get_table method
-		tbl = (table === undefined) ? tables : get_table(table);
-		// loop TABLE
-		for (t = 0; t < tbl.length; t++) {
+		removeSelection();
+		// if table input parameter is undefined then use "tables" private property (table array) or set table reference from getTable method
+		tbl = (table === undefined) ? tables : getTable(table);
+		// TABLE loop
+		for (let t = 0; t < tbl.length; t++) {
 			// define cell list with new coordinates
-			cl = cell_list(tbl[t]);
+			cl = cellList(tbl[t]);
 			// define maximum number of columns in table
-			max = max_cols(tbl[t]);
+			max = maxCols(tbl[t]);
 			// define row number in current table
 			tr = tbl[t].rows;
 			// loop TR
-			for (i = 0; i < tr.length; i++) {
+			for (let i = 0; i < tr.length; i++) {
 				// define column number (depending on mode)
 				cols = (mode === 'v') ? max : tr[i].cells.length;
 				// loop TD
-				for (j = 0; j < cols; j++) {
+				for (let j = 0; j < cols; j++) {
 					// split vertically
 					if (mode === 'v') {
 						// define current table cell
@@ -504,7 +508,7 @@ REDIPS.table = (function () {
 						// if marked cell is found and rowspan property is greater then 1
 						if (c !== undefined && c.redips.selected === true && c.rowSpan > 1) {
 							// get rowspaned cells before current cell (in a row)
-							rs = get_rowspan(c, i, j);
+							rs = getRowSpan(c, i, j);
 							// insert new cell at last position of rowspan (consider rowspan cells before)
 							n = tr[i + c.rowSpan - 1].insertCell(j - rs);
 							// set the same colspan value as it has current cell
@@ -512,9 +516,9 @@ REDIPS.table = (function () {
 							// decrease rowspan of marked cell
 							c.rowSpan -= 1;
 							// add "redips" property to the table cell and optionally event listener
-							cell_init(n);
+							cellInit(n);
 							// recreate cell list after vertical split (new cell is inserted)
-							cl = cell_list(tbl[t]);
+							cl = cellList(tbl[t]);
 						}
 					}
 					// split horizontally
@@ -534,7 +538,7 @@ REDIPS.table = (function () {
 							// decrease colspan of marked cell
 							c.colSpan -= 1;
 							// add "redips" property to the table cell and optionally event listener
-							cell_init(n);
+							cellInit(n);
 						}
 					}
 					// return original background color and reset selected flag (if cell exists)
@@ -544,29 +548,29 @@ REDIPS.table = (function () {
 				}
 			}
 		}
-		// show cell index (if show_index public property is set to true)
-		cell_index();
+		// show cell index (if showIndex public property is set to true)
+		cellIndex();
 	};
 
 
 	/**
-	 * Method sets reference to the table. It is used in "merge" and "split" public methods. 
+	 * Method sets reference to table. It is used in "merge" and "split" public methods.
 	 * @param {HTMLElement|String} table Table id or table reference.
 	 * @return {Array} Returns empty array or array with one member (table node).
 	 * @private
 	 * @memberOf REDIPS.table#
 	 */
-	get_table = function (table) {
+	getTable = function (table) {
 		// define output array
-		var tbl = [];
+		let tbl = [];
 		// input parameter should exits
 		if (table !== undefined) {
 			// if table parameter is string then set reference and overwrite input parameter
-			if (typeof(table) === 'string') {
+			if (typeof (table) === 'string') {
 				table = document.getElementById(table);
 			}
 			// set table reference if table is not null and table is object and node is TABLE
-			if (table && typeof(table) === 'object' && table.nodeName === 'TABLE') {
+			if (table && typeof (table) === 'object' && table.nodeName === 'TABLE') {
 				tbl[0] = table;
 			}
 		}
@@ -586,7 +590,7 @@ REDIPS.table = (function () {
 	 * @name REDIPS.table#row
 	 */
 	row = function (table, mode, index) {
-		var	nc,			// new cell
+		let nc,			// new cell
 			nr = null,	// new row
 			fr,			// reference of first row
 			c,			// current cell reference
@@ -594,9 +598,9 @@ REDIPS.table = (function () {
 			cols = 0,	// number of columns
 			i, j, k;	// loop variables
 		// remove text selection
-		remove_selection();
+		removeSelection();
 		// if table is not object then input parameter is id and table parameter will be overwritten with table reference
-		if (typeof(table) !== 'object') {
+		if (typeof (table) !== 'object') {
 			table = document.getElementById(table);
 		}
 		// if index is not defined then index of the last row
@@ -617,10 +621,10 @@ REDIPS.table = (function () {
 			for (i = 0; i < cols; i++) {
 				nc = nr.insertCell(i);
 				// add "redips" property to the table cell and optionally event listener
-				cell_init(nc);
+				cellInit(nc);
 			}
-			// show cell index (if show_index public property is set to true)
-			cell_index();
+			// show cell index (if showIndex public property is set to true)
+			cellIndex();
 		}
 		// delete table row and update rowspan for cells in upper rows if needed
 		else {
@@ -631,11 +635,11 @@ REDIPS.table = (function () {
 			// delete last row
 			table.deleteRow(index);
 			// prepare cell list
-			cl = cell_list(table);
+			cl = cellList(table);
 			// set new index for last row
 			index = table.rows.length - 1;
 			// set maximum number of columns that table has
-			cols = max_cols(table);
+			cols = maxCols(table);
 			// open loop for each cell in last row
 			for (i = 0; i < cols; i++) {
 				// try to find cell in last row
@@ -670,20 +674,20 @@ REDIPS.table = (function () {
 	 * Method adds / deletes table column. Last column will be assumed if index is omitted.
 	 * @param {HTMLElement|String} table Table id or table reference.
 	 * @param {String} mode Insert/delete table column
-	 * @param {Integer} [index] Index where column will be inserted or deleted. Last column will be assumed if index is not defined.  
+	 * @param {Integer} [index] Index where column will be inserted or deleted. Last column will be assumed if index is not defined.
 	 * @public
 	 * @function
 	 * @name REDIPS.table#column
 	 */
 	column = function (table, mode, index) {
-		var	c,		// current cell
+		let c,		// current cell
 			idx,	// cell index needed when column is deleted
 			nc,		// new cell
 			i;		// loop variable
 		// remove text selection
-		remove_selection();
+		removeSelection();
 		// if table is not object then input parameter is id and table parameter will be overwritten with table reference
-		if (typeof(table) !== 'object') {
+		if (typeof (table) !== 'object') {
 			table = document.getElementById(table);
 		}
 		// if index is not defined then index will be set to special value -1 (means to remove the very last column of a table or add column to the table end)
@@ -697,10 +701,10 @@ REDIPS.table = (function () {
 				// insert cell
 				nc = table.rows[i].insertCell(index);
 				// add "redips" property to the table cell and optionally event listener
-				cell_init(nc);
+				cellInit(nc);
 			}
-			// show cell index (if show_index public property is set to true)
-			cell_index();
+			// show cell index (if showIndex public property is set to true)
+			cellIndex();
 		}
 		// delete table column
 		else {
@@ -741,19 +745,19 @@ REDIPS.table = (function () {
 	 * Method sets or removes mark from table cell. It can be called on several ways:
 	 * with direct cell address (cell reference or cell id) or with cell coordinates (row and column).
 	 * @param {Boolean} flag If set to true then TD will be marked, otherwise table cell will be cleaned.
-	 * @param {HTMLElement|String} el Cell reference or id of table cell. Or it can be table reference or id of the table.  
+	 * @param {HTMLElement|String} el Cell reference or id of table cell. Or it can be table reference or id of the table.
 	 * @param {Integer} [row] Row of the cell.
 	 * @param {Integer} [col] Column of the cell.
 	 * @example
 	 * // set mark to the cell with "mycell" reference
 	 * REDIPS.table.mark(true, mycell);
-	 *  
+	 *
 	 * // remove mark from the cell with id "a1"
 	 * REDIPS.table.mark(false, "a1");
-	 *  
-	 * // set mark to the cell with coordinates (1,2) on table with reference "mytable"   
+	 *
+	 * // set mark to the cell with coordinates (1,2) on table with reference "mytable"
 	 * REDIPS.table.mark(true, mytable, 1, 2);
-	 *  
+	 *
 	 * // remove mark from the cell with coordinates (4,5) on table with id "t3"
 	 * REDIPS.table.mark(false, "t3", 4, 5);
 	 * @public
@@ -762,24 +766,24 @@ REDIPS.table = (function () {
 	 */
 	mark = function (flag, el, row, col) {
 		// cell list with new coordinates
-		var cl;
+		let cl;
 		// first parameter "flag" should be boolean (if not, then return from method
-		if (typeof(flag) !== 'boolean') {
+		if (typeof (flag) !== 'boolean') {
 			return;
 		}
 		// test type of the second parameter (it can be string or object)
-		if (typeof(el) === 'string') {
+		if (typeof (el) === 'string') {
 			// set reference to table or table cell (overwrite input el parameter)
 			el = document.getElementById(el);
 		}
 		// if el is not string and is not an object then return from the method
-		else if (typeof(el) !== 'object') {
+		else if (typeof (el) !== 'object') {
 			return;
 		}
 		// at this point, el should be an object - so test if it's TD or TABLE
 		if (el.nodeName === 'TABLE') {
 			// prepare cell list
-			cl = cell_list(el);
+			cl = cellList(el);
 			// set reference to the cell (overwrite input el parameter)
 			el = cl[row + '-' + col];
 		}
@@ -790,7 +794,7 @@ REDIPS.table = (function () {
 		// if custom property "redips" doesn't exist then create custom property
 		el.redips = el.redips || {};
 		// if color property is string, then TD background color will be changed (REDIPS.table.color.cell can be set to false)
-		if (typeof(REDIPS.table.color.cell) === 'string') {
+		if (typeof (REDIPS.table.color.cell) === 'string') {
 			// mark table cell
 			if (flag === true) {
 				// remember old color
@@ -806,7 +810,6 @@ REDIPS.table = (function () {
 		}
 		// set flag (true/false) to the cell "selected" property
 		el.redips.selected = flag;
-
 	};
 
 
@@ -815,18 +818,18 @@ REDIPS.table = (function () {
 	 * @private
 	 * @memberOf REDIPS.table#
 	 */
-	remove_selection = function () {
+	removeSelection = function () {
 		// remove text selection (Chrome, FF, Opera, Safari)
 		if (window.getSelection) {
 			window.getSelection().removeAllRanges();
 		}
 		// IE8
-		else if (document.selection && document.selection.type === "Text") {
+		else if (document.selection && document.selection.type === 'Text') {
 			try {
 				document.selection.empty();
 			}
 			catch (error) {
-				// ignore error to as a workaround for bug in IE8
+				// ignore error (if there is any)
 			}
 		}
 	};
@@ -839,23 +842,23 @@ REDIPS.table = (function () {
 	 * @private
 	 * @memberOf REDIPS.table#
 	 */
-	cell_list = function (table) {
-		var matrix = [],
+	cellList = function (table) {
+		let matrix = [],
 			matrixrow,
 			lookup = {},
-			c,			// current cell
-			ri,			// row index
+			c,		// current cell
+			ri,		// row index
 			rowspan,
 			colspan,
 			firstAvailCol,
-			tr,			// TR collection
-			i, j, k, l;	// loop variables
+			tr,		// TR collection
+			k;		// loop variables
 		// set HTML collection of table rows
 		tr = table.rows;
 		// open loop for each TR element
-		for (i = 0; i < tr.length; i++) {
+		for (let i = 0; i < tr.length; i++) {
 			// open loop for each cell within current row
-			for (j = 0; j < tr[i].cells.length; j++) {
+			for (let j = 0; j < tr[i].cells.length; j++) {
 				// define current cell
 				c = tr[i].cells[j];
 				// set row index
@@ -867,7 +870,7 @@ REDIPS.table = (function () {
 				matrix[ri] = matrix[ri] || [];
 				// find first available column in the first row
 				for (k = 0; k < matrix[ri].length + 1; k++) {
-					if (typeof(matrix[ri][k]) === 'undefined') {
+					if (typeof (matrix[ri][k]) === 'undefined') {
 						firstAvailCol = k;
 						break;
 					}
@@ -877,7 +880,7 @@ REDIPS.table = (function () {
 				for (k = ri; k < ri + rowspan; k++) {
 					matrix[k] = matrix[k] || [];
 					matrixrow = matrix[k];
-					for (l = firstAvailCol; l < firstAvailCol + colspan; l++) {
+					for (let l = firstAvailCol; l < firstAvailCol + colspan; l++) {
 						matrixrow[l] = 'x';
 					}
 				}
@@ -888,7 +891,7 @@ REDIPS.table = (function () {
 
 
 	/**
-	 * Method relocates element nodes from source cell to the target table cell.
+	 * Method relocates element nodes from source cell to target table cell.
 	 * It is used in case of merging table cells.
 	 * @param {HTMLElement} from Source table cell.
 	 * @param {HTMLElement} to Target table cell.
@@ -896,8 +899,7 @@ REDIPS.table = (function () {
 	 * @memberOf REDIPS.table#
 	 */
 	relocate = function (from, to) {
-		var cn,		// number of child nodes
-			i, j;	// loop variables
+		let cn; // number of child nodes
 		// test if "from" cell is equal to "to" cell then do nothing
 		if (from === to) {
 			return;
@@ -906,7 +908,7 @@ REDIPS.table = (function () {
 		cn = from.childNodes.length;
 		// loop through all child nodes in table cell
 		// 'j', not 'i' because NodeList objects in the DOM are live
-		for (i = 0, j = 0; i < cn; i++) {
+		for (let i = 0, j = 0; i < cn; i++) {
 			// relocate only element nodes
 			if (from.childNodes[j].nodeType === 1) {
 				to.appendChild(from.childNodes[j]);
@@ -915,7 +917,7 @@ REDIPS.table = (function () {
 			else {
 				j++;
 			}
-		}	
+		}
 	};
 
 
@@ -924,43 +926,42 @@ REDIPS.table = (function () {
 	 * @param {Boolean} flag If set to true then cell content will be replaced with cell index.
 	 * @public
 	 * @function
-	 * @name REDIPS.table#cell_index
+	 * @name REDIPS.table#cellIndex
 	 */
-	cell_index = function (flag) {
-		// if input parameter isn't set and show_index private property is'nt true, then return
-		// input parameter "flag" can be undefined in case of internal calls 
-		if (flag === undefined && show_index !== true) {
+	cellIndex = function (flag) {
+		// if input parameter isn't set and showIndex private property is'nt true, then return
+		// input parameter "flag" can be undefined in case of internal calls
+		if (flag === undefined && showIndex !== true) {
 			return;
 		}
-		// if input parameter is set, then save parameter to the private property show_index
+		// if input parameter is set, then save parameter to the private property showIndex
 		if (flag !== undefined) {
-			// save flag to the show_index private parameter
-			show_index = flag;
+			// save flag to the showIndex private parameter
+			showIndex = flag;
 		}
 		// variable declaration
-		var tr,			// number of rows in a table
+		let tr,			// number of rows in a table
 			c,			// current cell
 			cl,			// cell list
-			cols,		// maximum number of columns that table contains
-			i, j, t;	// loop variables
+			cols;		// maximum number of columns that table contains
 		// open loop for each table inside container
-		for (t = 0; t < tables.length; t++) {
+		for (let t = 0; t < tables.length; t++) {
 			// define row number in current table
 			tr = tables[t].rows;
 			// define maximum number of columns (table row may contain merged table cells)
-			cols = max_cols(tables[t]);
+			cols = maxCols(tables[t]);
 			// define cell list
-			cl = cell_list(tables[t]);
+			cl = cellList(tables[t]);
 			// open loop for each row
-			for (i = 0; i < tr.length; i++) {
+			for (let i = 0; i < tr.length; i++) {
 				// open loop for every TD element in current row
-				for (j = 0; j < cols; j++) {
+				for (let j = 0; j < cols; j++) {
 					// if cell exists then display cell index
 					if (cl[i + '-' + j]) {
 						// set reference to the current cell
 						c = cl[i + '-' + j];
 						// set innerHTML with cellIndex property
-						c.innerHTML = (show_index) ? i + '-' + j : '';
+						c.innerHTML = (showIndex) ? i + '-' + j : '';
 					}
 				}
 			}
@@ -979,37 +980,36 @@ REDIPS.table = (function () {
 		 * // set "#9BB3DA" as color for marked cell
 		 * REDIPS.table.color.cell = '#9BB3DA';
 		 */
-		color : color,
+		color: color,
 		/**
 		 * Enable / disable marking not empty table cells.
 		 * @type Boolean
-		 * @name REDIPS.table#mark_nonempty
+		 * @name REDIPS.table#markNonEmpty
 		 * @default true
 		 * @example
 		 * // allow marking only empty cells
-		 * REDIPS.table.mark_nonempty = false;
+		 * REDIPS.table.markNonEmpty = false;
 		 */
-		mark_nonempty : mark_nonempty,
+		markNonEmpty: markNonEmpty,
 		/* public methods are documented in main code */
-		onmousedown : onmousedown,
-		mark : mark,
-		merge : merge,
-		split : split,
-		row : row,
-		column : column,
-		cell_index : cell_index,
-		cell_ignore : cell_ignore
+		onMouseDown: onMouseDown,
+		mark: mark,
+		merge: merge,
+		split: split,
+		row: row,
+		column: column,
+		cellIndex: cellIndex,
+		cellIgnore: cellIgnore
 	};
 }());
 
 
-
-// if REDIPS.event isn't already defined (from other REDIPS file) 
+// if REDIPS.event isn't already defined (from other REDIPS file)
 if (!REDIPS.event) {
 	REDIPS.event = (function () {
 		var add,	// add event listener
 			remove;	// remove event listener
-		
+
 		// http://msdn.microsoft.com/en-us/scriptjunkie/ff728624
 		// http://www.javascriptrules.com/2009/07/22/cross-browser-event-listener-with-design-patterns/
 		// http://www.quirksmode.org/js/events_order.html
@@ -1027,7 +1027,7 @@ if (!REDIPS.event) {
 				obj['on' + eventName] = handler;
 			}
 		};
-	
+
 		// remove event listener
 		remove = function (obj, eventName, handler) {
 			if (obj.removeEventListener) {
@@ -1040,11 +1040,10 @@ if (!REDIPS.event) {
 				obj['on' + eventName] = null;
 			}
 		};
-	
+
 		return {
-			add		: add,
-			remove	: remove
-		}; // end of public (return statement)	
-		
+			add: add,
+			remove: remove
+		}; // end of public (return statement)
 	}());
 }
