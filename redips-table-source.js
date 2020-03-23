@@ -34,28 +34,28 @@ var REDIPS = REDIPS || {}; // eslint-disable-line no-use-before-define
  */
 REDIPS.table = (function () {
 	// methods declaration
-	var onMouseDown,			// method attaches onMouseDown event listener to table cells
+	var onMouseDown,		// method attaches onMouseDown event listener to table cells
 		handlerOnMouseDown,	// onMouseDown handler
-		merge,					// method merges marked cells
+		merge,				// method merges marked cells
 		mergeCells,			// method merges/deletes table cells (used by merge_h & merge_v)
-		maxCols,				// method returns maximum number of columns in a table
-		split,					// method splits merged cells (if cell has colspan/rowspan greater then 1)
-		getTable,				// method sets reference to the table (it's used in "merge" and "split" public methods)
-		mark,					// method marks table cell
-		cellInit,				// method attaches "mousedown" event listener and creates "redips" property to the newly created table cell
-		row,					// method adds/deletes table row
-		column,					// method adds/deletes table column
-		cellList,				// method returns cell list with new coordinates
-		relocate,				// relocate element nodes from source cell to the target cell
-		removeSelection,		// method removes text selection
-		cellIndex,				// method displays cellIndex (debug mode)
+		maxCols,			// method returns maximum number of columns in a table
+		split,				// method splits merged cells (if cell has colspan/rowspan greater then 1)
+		getTable,			// method sets reference to the table (it's used in "merge" and "split" public methods)
+		mark,				// method marks table cell
+		cellInit,			// method attaches "mousedown" event listener and creates "redips" property to the newly created table cell
+		row,				// method adds/deletes table row
+		column,				// method adds/deletes table column
+		cellList,			// method returns cell list with new coordinates
+		relocate,			// relocate element nodes from source cell to the target cell
+		removeSelection,	// method removes text selection
+		cellIndex,			// method displays cellIndex (debug mode)
 		cellIgnore,			// method removes onMouseDown even listener in case of active REDIPS.table.onMouseDown mode
-		getParentCell,			// method returns first parent in tree what is TD or TH
+		getParentCell,		// method returns first parent in tree what is TD or TH
 
 		// private properties
-		tables = [],			// table collection
-		tdEvent,				// (boolean) if set to true then cellInit will attach event listener to the table cell
-		showIndex,				// (boolean) show cell index
+		tables = [],		// table collection
+		tdEvent,			// (boolean) if set to true then cellInit will attach event listener to the table cell
+		showIndex,			// (boolean) show cell index
 
 		// variables in the private scope revealed as public properties
 		color = {
@@ -71,13 +71,13 @@ REDIPS.table = (function () {
 	 * All found tables will be saved in internal array.
 	 * Sending reference in this case will not be needed when calling merge or split method.
 	 * Table cells marked with class name "ignore" will not have attached onMouseDown event listener (in short, these table cells will be ignored).
-	 * @param {String|HTMLElement} el Container Id. TD elements within container will have added onmousewdown event listener.
+	 * @param {String|HTMLElement} el Container Id. TD elements within container will have added onMouseDown event listener.
 	 * @param {Boolean} [flag] If set to true then onMouseDown event listener will be attached to every table cell.
 	 * @param {String} [type] If set to "class name" then all tables with a given class name (first parameter is considered as class name) will be initialized. Default is container/table reference or container/table id.
 	 * @example
 	 * // activate onMouseDown event listener on cells within table with id="mainTable"
 	 * REDIPS.table.onMouseDown('mainTable', true);
-	 *
+	 * <nl/>
 	 * // activate onMouseDown event listener on cells for tables with class="blue"
 	 * REDIPS.table.onMouseDown('blue', true, 'classname');
 	 * @public
@@ -86,7 +86,7 @@ REDIPS.table = (function () {
 	 */
 	onMouseDown = function (el, flag, type) {
 		let td,			// collection of table cells within container
-			th, // collection of table header cells within container
+			th, 		// collection of table header cells within container
 			i, t,		// loop variables
 			getTables;	// private method returns array
 		// method returns array with table nodes for a DOM node
@@ -182,7 +182,7 @@ REDIPS.table = (function () {
 
 	/**
 	 * Method removes attached onMouseDown event listener.
-	 * Sometimes is needed to manually ignore some cells in table after row/column were dynamically added.
+	 * Sometimes is needed to manually ignore some cells in table after row/column is dynamically added.
 	 * @param {HTMLElement|String} c Cell id or cell reference of table that should be ignored (onMouseDown event listener will be removed).
 	 * @public
 	 * @function
@@ -199,7 +199,7 @@ REDIPS.table = (function () {
 
 
 	/**
-	 * On mousedown event attached to the table cell. If left mouse button is clicked and table cell is empty then cell will be marked or cleaned.
+	 * On mouseDown event attached to the table cell. If left mouse button is clicked and table cell is empty then cell will be marked or cleaned.
 	 * This event handler is attached to every TD element.
 	 * @param {Event} e Event information.
 	 * @private
@@ -245,8 +245,8 @@ REDIPS.table = (function () {
 	};
 
 	/**
-	 * Method returns first parent in tree what is TD or TH
-	 * Needed when there is rich content inside cell and selection onMouseDown event is triggered on cell content
+	 * Method returns first parent in DOM tree and that is TD or TH.
+	 * Needed when there is rich content inside cell and selection onMouseDown event is triggered on cell content.
 	 * @param {HTMLElement} node Node
 	 * @private
 	 * @function
@@ -580,7 +580,7 @@ REDIPS.table = (function () {
 
 
 	/**
-	 * Method adds / deletes table row. If index is omitted then index of last row will be set.
+	 * Add or delete table row. If index is omitted then index of last row will be used.
 	 * @param {HTMLElement|String} table Table id or table reference.
 	 * @param {String} mode Insert/delete table row
 	 * @param {Integer} [index] Index where row will be inserted or deleted. Last row will be assumed if index is not defined.
@@ -671,9 +671,9 @@ REDIPS.table = (function () {
 
 
 	/**
-	 * Method adds / deletes table column. Last column will be assumed if index is omitted.
+	 * Add or delete table column. Last column will be assumed if index is omitted.
 	 * @param {HTMLElement|String} table Table id or table reference.
-	 * @param {String} mode Insert/delete table column
+	 * @param {String} mode Insert / delete table column
 	 * @param {Integer} [index] Index where column will be inserted or deleted. Last column will be assumed if index is not defined.
 	 * @public
 	 * @function
@@ -751,15 +751,15 @@ REDIPS.table = (function () {
 	 * @example
 	 * // set mark to the cell with "mycell" reference
 	 * REDIPS.table.mark(true, mycell);
-	 *
+	 * <nl/>
 	 * // remove mark from the cell with id "a1"
-	 * REDIPS.table.mark(false, "a1");
-	 *
+	 * REDIPS.table.mark(false, 'a1');
+	 * <nl/>
 	 * // set mark to the cell with coordinates (1,2) on table with reference "mytable"
 	 * REDIPS.table.mark(true, mytable, 1, 2);
-	 *
+	 * <nl/>
 	 * // remove mark from the cell with coordinates (4,5) on table with id "t3"
-	 * REDIPS.table.mark(false, "t3", 4, 5);
+	 * REDIPS.table.mark(false, 't3', 4, 5);
 	 * @public
 	 * @function
 	 * @name REDIPS.table#mark
@@ -836,7 +836,7 @@ REDIPS.table = (function () {
 
 
 	/**
-	 * Determining a table cell's X and Y position/index.
+	 * Determining X and Y position/index of table cell.
 	 * @see <a href="http://www.javascripttoolbox.com/temp/table_cellindex.html">http://www.javascripttoolbox.com/temp/table_cellindex.html</a>
 	 * @see <a href="http://www.barryvan.com.au/2012/03/determining-a-table-cells-x-and-y-positionindex/">http://www.barryvan.com.au/2012/03/determining-a-table-cells-x-and-y-positionindex/</a>
 	 * @private
@@ -922,7 +922,7 @@ REDIPS.table = (function () {
 
 
 	/**
-	 * Method displays cellIndex for each cell in tables. It is useful in debuging process.
+	 * Display cellIndex for each cell in tables. It is useful in debuging process.
 	 * @param {Boolean} flag If set to true then cell content will be replaced with cell index.
 	 * @public
 	 * @function
