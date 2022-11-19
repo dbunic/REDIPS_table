@@ -37,10 +37,16 @@ REDIPS.table = (function () {
 	var onMouseDown,		// method attaches onMouseDown event listener to table cells
 		handlerOnMouseDown,	// onMouseDown handler
 		merge,				// method merges marked cells
+    mergeAuto,     // method to auto merge cells with coordinates as parameters (Vertical only!).
 		mergeCells,			// method merges/deletes table cells (used by merge_h & merge_v)
+    checkMerged,    // method to check which cells are merged (Vertical only!).
 		maxCols,			// method returns maximum number of columns in a table
 		split,				// method splits merged cells (if cell has colspan/rowspan greater then 1)
-		getTable,			// method sets reference to the table (it's used in "merge" and "split" public methods)
+    setColor,    // method to set cell colors
+    autoSetColor,   // method to auto set cell colors with coordinates as parameters
+    getColor,    // method to get coordinates and colors of colored cells
+    resetColor,    //method to reset color of all cells
+    getTable,			// method sets reference to the table (it's used in "merge" and "split" public methods)
 		mark,				// method marks table cell
 		cellInit,			// method attaches "mousedown" event listener and creates "redips" property to the newly created table cell
 		row,				// method adds/deletes table row
@@ -51,6 +57,8 @@ REDIPS.table = (function () {
 		cellIndex,			// method displays cellIndex (debug mode)
 		cellIgnore,			// method removes onMouseDown even listener in case of active REDIPS.table.onMouseDown mode
 		getParentCell,		// method returns first parent in tree what is TD or TH
+    getRowSpan,        // method returns number of rowspan cells before current cell (in a row)
+    testFunction,     // test method for debugging
 
 		// private properties
 		tables = [],		// table collection
@@ -262,7 +270,6 @@ REDIPS.table = (function () {
 		return getParentCell(node.parentNode);
 	};
 
-
 	/**
 	 * Method merges marked table cells horizontally or vertically.
 	 * @param {String} mode Merge type: h - horizontally, v - vertically. Default is "h".
@@ -283,11 +290,13 @@ REDIPS.table = (function () {
 			id,			// cell id in format "1-2", "1-4" ...
 			cl,			// cell list with new coordinates
 			j,			// loop variable
+      mergedArr, // array of merged coordinates
 			first = {
 				index: -1,	// index of first cell in sequence
 				span: -1};		// span value (colspan / rowspan) of first cell in sequence
-		// remove text selection
+    // remove text selection
 		removeSelection();
+    mergedArr = [];
 		// if table input parameter is undefined then use "tables" private property (table array) or set table reference from getTable method
 		tbl = (table === undefined) ? tables : getTable(table);
 		// open loop for each table inside container
@@ -330,7 +339,8 @@ REDIPS.table = (function () {
 					// sequence of marked cells is finished (naturally or next cell has different span value)
 					else if ((marked !== true && first.index > -1) || (first.span > -1 && first.span !== span)) {
 						// merge cells in a sequence (cell list, row/column, sequence start, sequence end, horizontal/vertical mode)
-						mergeCells(cl, i, first.index, j, mode, clear);
+            mergedArr.push([i, first.index, (j-1)]);
+            mergeCells(cl, i, first.index, j, mode, clear);
 						// reset marked cell index and span value
 						first.index = first.span = -1;
 						// if cell is selected then unmark and reset marked flag
@@ -350,14 +360,58 @@ REDIPS.table = (function () {
 				}
 				// if loop is finished and last cell is marked (needed in case when TD sequence include last cell in table row)
 				if (marked === true) {
-					mergeCells(cl, i, first.index, j, mode, clear);
+          mergedArr.push([i, first.index, j]);
+          mergeCells(cl, i, first.index, j, mode, clear);
 				}
 			}
 		}
 		// show cell index (if showIndex public property is set to true)
 		cellIndex();
+    return mergedArr;
 	};
 
+  /**
+   * Method to auto merge cells with coordinates as parameters (Vertical only!).
+   * @param {String} mode Merge type: h - horizontally, v - vertically. Default is "h".
+   * @param {Array} coords An array of cell coordinates to be merged, in the format [col, rowStart, rowEnd].
+   * @param {Boolean} [clear] true - cells will be clean (without mark) after merging, false -  cells will remain marked after merging. Default is "true".
+   * @param {HTMLElement|String} [table] Table id or table reference.
+   * @public
+   * @function
+	 * @name REDIPS.table#mergeAuto
+  */
+
+  mergeAuto = function (mode, coords, clear, table) {
+    let tbl,		// table array (loaded from tables array or from table input parameter)
+      tr,			// row reference in table
+      c,			// current cell
+      rc1,		// row/column maximum value for first loop
+      rc2,		// row/column maximum value for second loop
+      marked,		// (boolean) marked flag of current cell
+      span,		// (integer) rowspan/colspan value
+      id,			// cell id in format "1-2", "1-4" ...
+      cl,			// cell list with new coordinates
+      j,			// loop variable
+      first = {
+        index: -1,	// index of first cell in sequence
+        span: -1};		// span value (colspan / rowspan) of first cell in sequence
+    // remove text selection
+    removeSelection();
+    // if table input parameter is undefined then use "tables" private property (table array) or set table reference from getTable method
+    tbl = (table === undefined) ? tables : getTable(table);
+    // open loop for each table inside container
+    for (let t = 0; t < tbl.length; t++) {
+      // define cell list with new coordinates
+      cl = cellList(tbl[t]);
+      // define row number in current table
+      tr = tbl[t].rows;
+      coords.forEach((list, ind) => {
+        mergeCells(cl, list[0], list[1], (list[2]+1), mode, clear);
+      });
+    }
+    // show cell index (if showIndex public property is set to true)
+    cellIndex();
+  };
 
 	/**
 	 * Method merges and deletes table cells in sequence (horizontally or vertically).
@@ -368,7 +422,8 @@ REDIPS.table = (function () {
 	 * @param {String} mode Merge type: h - horizontally, v - vertically. Default is "h".
 	 * @param {Boolean} [clear] true - cells will be clean (without mark) after merging, false -  cells will remain marked after merging. Default is "true".
 	 * @private
-	 * @memberOf REDIPS.table#
+   * @function
+	 * @name REDIPS.table#mergeCells
 	 */
 	mergeCells = function (cl, idx, pos1, pos2, mode, clear) {
 		let span = 0,	// set initial span value to 0
@@ -389,7 +444,7 @@ REDIPS.table = (function () {
 				span += (mode === 'v') ? c.rowSpan : c.colSpan;
 				// relocate content before deleting cell in merging process
 				relocate(c, fc);
-				// delete cell
+        // delete cell
 				c.parentNode.deleteCell(c.cellIndex);
 			}
 		}
@@ -410,6 +465,84 @@ REDIPS.table = (function () {
 		}
 	};
 
+  /**
+   * Method to check which cells are merged (Vertical only!).
+   * @param {String} mode Merge type: h - horizontally, v - vertically. Default is "h".
+   * @param {HTMLElement|String} [table] Table id or table reference.
+   * @public
+   * @function
+   * @name REDIPS.table#checkMerged
+  */
+
+  checkMerged = function (mode, table) {
+    let tbl,	// table array (loaded from tables array or from table input parameter)
+      tr,		// row reference in table
+      c,		// current table cell
+      cl,		// cell list with new coordinates
+      rs,		// rowspan cells before
+      n,		// reference of inserted table cell
+      cols,	// number of columns (used in TD loop)
+      max,	// maximum number of columns
+      results,  // object containing new cell and new cell coordinates in the format [col, rowStart, rowEnd]
+      resultsArr;  // array of results
+
+    resultsArr = [];
+    // remove text selection
+    removeSelection();
+    // if table input parameter is undefined then use "tables" private property (table array) or set table reference from getTable method
+    tbl = (table === undefined) ? tables : getTable(table);
+    // TABLE loop
+    for (let t = 0; t < tbl.length; t++) {
+      // define cell list with new coordinates
+      cl = cellList(tbl[t]);
+      // define maximum number of columns in table
+      max = maxCols(tbl[t]);
+      // define row number in current table
+      tr = tbl[t].rows;
+      // loop TR
+      for (let i = 0; i < tr.length; i++) {
+        // define column number (depending on mode)
+        cols = (mode === 'v') ? max : tr[i].cells.length;
+        // loop TD
+        for (let j = 0; j < cols; j++) {
+          // split vertically
+          if (mode === 'v') {
+            // define current table cell
+            c = cl[i + '-' + j];
+            // if custom property "redips" doesn't exist then create custom property
+            if (c !== undefined) {
+              c.redips = c.redips || {};
+            }
+            // if marked cell is found and rowspan property is greater then 1
+            if (c !== undefined && c.rowSpan > 1) {
+              // get rowspaned cells before current cell (in a row)
+              rs = getRowSpan(cl, c, i, j);
+              cl = cellList(tbl[t]);
+              resultsArr.push([j,i,i+c.rowSpan-1]);
+            }
+          }
+          // split horizontally
+          else {
+            // define current table cell
+            c = tr[i].cells[j];
+            // if custom property "redips" doesn't exist then create custom property
+            c.redips = c.redips || {};
+            // if marked cell is found and cell has colspan property greater then 1
+            if (c.colSpan > 1) {
+              resultsArr.push([i,j,j+c.colSpan-1]);
+            }
+          }
+          // return original background color and reset selected flag (if cell exists)
+          if (c !== undefined) {
+            mark(false, c);
+          }
+        }
+      }
+    }
+    // show cell index (if showIndex public property is set to true)
+    cellIndex();
+    return resultsArr;
+  };
 
 	/**
 	 * Method returns number of maximum columns in table (some row may contain merged cells).
@@ -460,25 +593,11 @@ REDIPS.table = (function () {
 			n,		// reference of inserted table cell
 			cols,	// number of columns (used in TD loop)
 			max,	// maximum number of columns
-			getRowSpan;
-		// method returns number of rowspan cells before current cell (in a row)
-		getRowSpan = function (c, row, col) {
-			let rs,
-				last,
-				i;
-			// set rs
-			rs = 0;
-			// set row index of bottom row for the current cell with rowspan value
-			last = row + c.rowSpan - 1;
-			// go through every cell before current cell in a row
-			for (i = col - 1; i >= 0; i--) {
-				// if cell doesn't exist then rowspan cell exists before
-				if (cl[last + '-' + i] === undefined) {
-					rs++;
-				}
-			}
-			return rs;
-		};
+      results,  // object containing new cell and new cell coordinates
+      resultsArr;  // array of results
+
+    results = {};
+    resultsArr = [];
 		// remove text selection
 		removeSelection();
 		// if table input parameter is undefined then use "tables" private property (table array) or set table reference from getTable method
@@ -508,9 +627,13 @@ REDIPS.table = (function () {
 						// if marked cell is found and rowspan property is greater then 1
 						if (c !== undefined && c.redips.selected === true && c.rowSpan > 1) {
 							// get rowspaned cells before current cell (in a row)
-							rs = getRowSpan(c, i, j);
+							rs = getRowSpan(cl, c, i, j);
 							// insert new cell at last position of rowspan (consider rowspan cells before)
 							n = tr[i + c.rowSpan - 1].insertCell(j - rs);
+              results.cell = n;
+              results.coords = [i,j+c.rowSpan-1];
+              resultsArr.push(results);
+              results = {};
 							// set the same colspan value as it has current cell
 							n.colSpan = c.colSpan;
 							// decrease rowspan of marked cell
@@ -533,6 +656,10 @@ REDIPS.table = (function () {
 							cols++;
 							// insert cell after current cell
 							n = tr[i].insertCell(j + 1);
+              results.cell = n;
+              results.coords = [i,j+c.colSpan-1];
+              resultsArr.push(results);
+              results = {};
 							// set the same rowspan value as it has current cell
 							n.rowSpan = c.rowSpan;
 							// decrease colspan of marked cell
@@ -550,8 +677,220 @@ REDIPS.table = (function () {
 		}
 		// show cell index (if showIndex public property is set to true)
 		cellIndex();
+    return resultsArr;
 	};
 
+  /**
+   * Method to set cell colors.
+   * @param {String} color Hex code of target color
+   * @param {HTMLElement|String} [table] Table id or table reference.
+   * @public
+   * @function
+   * @name REDIPS.table#setColor
+   */
+  setColor = function (color, table) {
+    let tbl,	// table array (loaded from tables array or from table input parameter)
+      tr,		// row reference in table
+      c,		// current table cell
+      cl,		// cell list with new coordinates
+      rs,		// rowspan cells before
+      n,		// reference of inserted table cell
+      cols,	// number of columns (used in TD loop)
+      max;	// maximum number of columns
+
+    // remove text selection
+    removeSelection();
+    // if table input parameter is undefined then use "tables" private property (table array) or set table reference from getTable method
+    tbl = (table === undefined) ? tables : getTable(table);
+    // TABLE loop
+    for (let t = 0; t < tbl.length; t++) {
+      // define cell list with new coordinates
+      cl = cellList(tbl[t]);
+      // define maximum number of columns in table
+      max = maxCols(tbl[t]);
+      // define row number in current table
+      tr = tbl[t].rows;
+      // loop TR
+      for (let i = 0; i < tr.length; i++) {
+        // define column number (depending on mode)
+				cols = max;
+        // loop TD
+        for (let j = 0; j < cols; j++) {
+          // define current table cell
+          c = cl[i + '-' + j];
+          if (c !== undefined) {
+            // if custom property "redips" doesn't exist then create custom property
+            c.redips = c.redips || {};
+            if (c.redips.selected === true) {
+              // return original background color and reset selected flag (if cell exists)
+              c.redips.background_old = color;
+              mark(false, c);
+            }
+          }
+        }
+      }
+    }
+    // show cell index (if showIndex public property is set to true)
+    cellIndex();
+  };
+
+  /**
+   * Method to auto set cell colors with coordinates as parameters.
+   * @param {colorArr} colorArr Array of coordinates and colours in the format of [col, row, color].
+   * @param {HTMLElement|String} [table] Table id or table reference.
+   * @public
+   * @function
+   * @name REDIPS.table#autoSetColor
+   */
+  autoSetColor = function (colorArr, table) {
+    let tbl,	// table array (loaded from tables array or from table input parameter)
+      tr,		// row reference in table
+      c,		// current table cell
+      cl,		// cell list with new coordinates
+      rs,		// rowspan cells before
+      n,		// reference of inserted table cell
+      cols,	// number of columns (used in TD loop)
+      max;	// maximum number of columns
+
+    // remove text selection
+    removeSelection();
+    // if table input parameter is undefined then use "tables" private property (table array) or set table reference from getTable method
+    tbl = (table === undefined) ? tables : getTable(table);
+    // TABLE loop
+    for (let t = 0; t < tbl.length; t++) {
+      // define cell list with new coordinates
+      cl = cellList(tbl[t]);
+      colorArr.forEach((list, ind) => {
+        c = cl[list[1] + '-' + list[0]];
+        if (c !== undefined) {
+          c.redips = c.redips || {};
+          // return original background color and reset selected flag (if cell exists)
+          c.redips.background_old = list[2];
+          mark(false, c);
+        }
+      });
+    }
+    // show cell index (if showIndex public property is set to true)
+    cellIndex();
+  };
+
+  /**
+   * Method to get coordinates and colors of colored cells.
+   * @param {HTMLElement|String} [table] Table id or table reference.
+   * @public
+   * @function
+   * @name REDIPS.table#getColor
+   */
+  getColor = function (table) {
+    let tbl,	// table array (loaded from tables array or from table input parameter)
+      tr,		// row reference in table
+      c,		// current table cell
+      cl,		// cell list with new coordinates
+      rs,		// rowspan cells before
+      n,		// reference of inserted table cell
+      cols,	// number of columns (used in TD loop)
+      max,	// maximum number of columns
+      results,  // object containing new cell and new cell coordinates
+      resultsArr;  // array of results
+
+    resultsArr = [];
+    // remove text selection
+    removeSelection();
+    // if table input parameter is undefined then use "tables" private property (table array) or set table reference from getTable method
+    tbl = (table === undefined) ? tables : getTable(table);
+    // TABLE loop
+    for (let t = 0; t < tbl.length; t++) {
+      // define cell list with new coordinates
+      cl = cellList(tbl[t]);
+      // define maximum number of columns in table
+      max = maxCols(tbl[t]);
+      // define row number in current table
+      tr = tbl[t].rows;
+      // loop TR
+      for (let i = 0; i < tr.length; i++) {
+        // define column number (depending on mode)
+				cols = max;
+        // loop TD
+        for (let j = 0; j < cols; j++) {
+          // define current table cell
+          c = cl[i + '-' + j];
+          // return original background color and reset selected flag (if cell exists)
+          if (c !== undefined) {
+            // if custom property "redips" doesn't exist then create custom property
+
+            if (c.redips.background_old !== undefined && c.redips.background_old !== ""){
+              results = [j, i, c.redips.background_old];
+              resultsArr.push(results);
+              results = [];
+            }
+          }
+        }
+      }
+    }
+    // show cell index (if showIndex public property is set to true)
+    cellIndex();
+    return resultsArr;
+  };
+
+  /**
+   * Method to reset color of selected or all cells.
+   * @param {Boolean} [flag] if set to true, then all cells will be reset, if set to false, only selected cells will be reset.
+   * @param {HTMLElement|String} [table] Table id or table reference.
+   * @public
+   * @function
+   * @name REDIPS.table#resetColor
+   */
+  resetColor = function (flag, table) {
+    let tbl,	// table array (loaded from tables array or from table input parameter)
+      tr,		// row reference in table
+      c,		// current table cell
+      cl,		// cell list with new coordinates
+      rs,		// rowspan cells before
+      n,		// reference of inserted table cell
+      cols,	// number of columns (used in TD loop)
+      max;	// maximum number of columns
+
+    // remove text selection
+    removeSelection();
+    // if table input parameter is undefined then use "tables" private property (table array) or set table reference from getTable method
+    tbl = (table === undefined) ? tables : getTable(table);
+    // TABLE loop
+    for (let t = 0; t < tbl.length; t++) {
+      // define cell list with new coordinates
+      cl = cellList(tbl[t]);
+      // define maximum number of columns in table
+      max = maxCols(tbl[t]);
+      // define row number in current table
+      tr = tbl[t].rows;
+      // loop TR
+      for (let i = 0; i < tr.length; i++) {
+        // define column number (depending on mode)
+        cols = max;
+        // loop TD
+        for (let j = 0; j < cols; j++) {
+          // define current table cell
+          c = cl[i + '-' + j];
+          if (c !== undefined) {
+            // if custom property "redips" doesn't exist then create custom property
+            c.redips = c.redips || {};
+            if (flag){
+              // return original background color and reset selected flag (if cell exists)
+              c.redips.background_old = "";
+              mark(false, c);
+            } else {
+              if (c.redips.selected === true) {
+                // return original background color and reset selected flag (if cell exists)
+                c.redips.background_old = "";
+                mark(false, c);
+              }
+            }
+          }
+        }
+      }
+    }
+    // show cell index (if showIndex public property is set to true)
+    cellIndex();
+  };
 
 	/**
 	 * Method sets reference to table. It is used in "merge" and "split" public methods.
@@ -968,6 +1307,25 @@ REDIPS.table = (function () {
 		}
 	};
 
+  // method returns number of rowspan cells before current cell (in a row)
+
+  getRowSpan = function (cl, c, row, col) {
+    let rs,
+      last,
+      i;
+    // set rs
+    rs = 0;
+    // set row index of bottom row for the current cell with rowspan value
+    last = row + c.rowSpan - 1;
+    // go through every cell before current cell in a row
+    for (i = col - 1; i >= 0; i--) {
+      // if cell doesn't exist then rowspan cell exists before
+      if (cl[last + '-' + i] === undefined) {
+        rs++;
+      }
+    }
+    return rs;
+  };
 
 	return {
 		/* public properties */
@@ -995,11 +1353,18 @@ REDIPS.table = (function () {
 		onMouseDown: onMouseDown,
 		mark: mark,
 		merge: merge,
+    mergeAuto: mergeAuto,
+    checkMerged: checkMerged,
 		split: split,
+    setColor: setColor,
+    autoSetColor: autoSetColor,
+    getColor: getColor,
+    resetColor: resetColor,
 		row: row,
 		column: column,
 		cellIndex: cellIndex,
-		cellIgnore: cellIgnore
+		cellIgnore: cellIgnore,
+    testFunction: testFunction
 	};
 }());
 
